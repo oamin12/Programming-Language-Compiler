@@ -11,7 +11,7 @@ statement. */
 
 
 %{
-    #include "Parser.tab.h"
+    #include "parser.tab.h"
     #include <stdlib.h>
     #include <stdio.h>
     #include<string.h>
@@ -20,6 +20,8 @@ statement. */
     extern int yylineno;
 	int yylex();
 %}
+
+
 %%
 
 "int" {return INT;}
@@ -27,12 +29,7 @@ statement. */
 "char" {return CHAR;}
 "string" {return STRING;}
 "bool" {return BOOL;}
-"short" {return SHORT;}
-"long" {return LONG;}   
-"double" {return DOUBLE;}
 "void" {return VOID;}
-"unsigned" {return UNSIGNED;}
-
 
 "if" {return IF;}
 "else" {return ELSE;}
@@ -41,41 +38,16 @@ statement. */
 "for" {return FOR;}
 "switch" {return SWITCH;}
 "case" {return CASE;}
+"default" {return DEFAULT;}
 "break" {return BREAK;}
 "continue" {return CONTINUE;}
 "return" {return RETURN;}
-"printf" {return PRINTF;}
-"scanf" {return SCANF;}
-"function" {return FUNCTION;}
-
-
-
-"define" {return DEFINE;}
-"ifdef" {return IFDEF;}
-"endif" {return ENDIF;}
-"ifndef" {return IFNDEF;}
 
 
 "NULL" {return NULL;}
-
+"const" {return CONST;}
 "TRUE" {return TRUE;}
 "FALSE" {return FALSE;}
-
-
-"abs" {return ABS;}
-"atof" {return ATOF;}
-"atoi" {return ATOI;}
-"atol" {return ATOL;}
-"cos" {return COS;}
-"sin" {return SIN;}
-"tan" {return TAN;}
-"exp" {return EXP;}
-"log" {return LOG;}
-"pow" {return POW;}
-"sqrt" {return SQRT;}
-"ceil" {return CEIL;}
-"floor" {return FLOOR;}
-"rand" {return RAND;}
 
 
 "++" {return INCREMENT;}
@@ -92,12 +64,20 @@ statement. */
 "||" {return OR;}
 "!" {return NOT;}
 
-"+" {return PLUS;}
+/* "+" {return PLUS;}
 "-" {return MINUS;}
 "*" {return MULTIPLY;}
 "/" {return DIVIDE;}
-"%" {return MODULO;}
-"=" {return ASSIGN;}
+"=" {return ASSIGN;} */
+/* "%" {return MODULO;} */
+
+
+
+
+";" {return SEMICOLON;}
+":" {return COLON;}
+"," {return COMMA;}
+
 
 [()]     { return *yytext; }
 
@@ -108,28 +88,16 @@ statement. */
 "/*" {char c; char p = 0; while((c = input()) != 0) {if(p == '*' && c == '/') break; p = c;} return EOL;}
 
 [a-zA-Z][a-zA-Z0-9_]* {yylval = strdup(yytext); return IDENTIFIER;}
-(0|[1-9][0-9]*) {yylval = atoi(yytext); return NUMBER;}
+(0|[1-9][0-9]*) {yylval.intg = atoi(yytext); return INTGER_NUMBER;}
 [0-9]*\.[0-9]+ | [0-9]+\.[0-9]* {yylval = atof(yytext); return FLOAT_NUMBER;}
-0b[01]+ {yylval = strtol(yytext, NULL, 2); return BINARY_NUMBER;} 
-0[0-7]+ {yylval = strtol(yytext, NULL, 8); return OCTAL_NUMBER;}
-0x[0-9a-fA-F]+ {yylval = strtol(yytext, NULL, 16); return HEXADECIMAL_NUMBER;}
 \"[^\"]*\" {yylval = strdup(yytext); return STRING_IDENTIFIER;}
+\'[^\'\"]\' {yylval = yytext[0]; return CHAR_IDENTIFIER;}
 . {return yytext[0];}
-
-
-
 
 %%
 
 
 int yywrap() {return 1;}
-int yyerror(char *s) {
-    fprintf(stderr, "Error: %s at line %d\n", s, yylineno);
-    return 0;
-}
-int main() {
-    yyparse();
-    return 0;
-}
+
 
 

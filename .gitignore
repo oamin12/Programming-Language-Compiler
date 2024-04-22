@@ -1,3 +1,5 @@
 *.tab.*
 lex.yy.c
 *.exe
+
+myCompiler.*
