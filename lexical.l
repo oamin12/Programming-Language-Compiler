@@ -103,6 +103,10 @@ statement. */
 
 [ \t]       ; 
 
+";" {return SEMICOLON;}
+":" {return COLON;}
+"," {return COMMA;}
+
 
 "//" {while(input() != '\n'); return EOL;}
 "/*" {char c; char p = 0; while((c = input()) != 0) {if(p == '*' && c == '/') break; p = c;} return EOL;}
