@@ -44,10 +44,10 @@ statement. */
 "return" {return RETURN;}
 
 
-"NULL" {return NULL;}
+"NULL" {return NULLL;}
 "const" {return CONST;}
-"TRUE" {return TRUE;}
-"FALSE" {return FALSE;}
+"TRUE" {return TRUEE;}
+"FALSE" {return FALSEE;}
 
 
 "++" {return INCREMENT;}
@@ -74,9 +74,9 @@ statement. */
 
 
 
-";" {return SEMICOLON;}
-":" {return COLON;}
-"," {return COMMA;}
+";" {return ';';}
+":" {return ':';}
+"," {return ',';}
 
 
 [()]     { return *yytext; }
@@ -84,11 +84,11 @@ statement. */
 [ \t]       ; 
 
 
-"//" {while(input() != '\n'); return EOL;}
-"/*" {char c; char p = 0; while((c = input()) != 0) {if(p == '*' && c == '/') break; p = c;} return EOL;}
+    /* "//" {while(input() != '\n'); return EOL;}
+    "/*" {char c; char p = 0; while((c = input()) != 0) {if(p == '*' && c == '/') break; p = c;} return EOL;} */
 
 [a-zA-Z][a-zA-Z0-9_]* {yylval = strdup(yytext); return IDENTIFIER;}
-(0|[1-9][0-9]*) {yylval.intg = atoi(yytext); return INTGER_NUMBER;}
+((0)|([1-9][0-9]*)) {yylval = atoi(yytext); return INTGER_NUMBER;}
 [0-9]*\.[0-9]+ | [0-9]+\.[0-9]* {yylval = atof(yytext); return FLOAT_NUMBER;}
 \"[^\"]*\" {yylval = strdup(yytext); return STRING_IDENTIFIER;}
 \'[^\'\"]\' {yylval = yytext[0]; return CHAR_IDENTIFIER;}

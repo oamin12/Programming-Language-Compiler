@@ -7,7 +7,7 @@
     int yylex();
 %}
 
-%union {
+/* %union {
   int intg;
   char* str;
   float flt;
@@ -15,19 +15,19 @@
   bool bl;
   void voidd;
 
-}
+} */
 
 %start S
 
-%token <intg> INTGER_NUMBER
-%token <flt> FLOAT_NUMBER
-%token <str> STRING_IDENTIFIER
-%token <chr> CHAR_IDENTIFIER
-%token <bl> TRUE FALSE
+%token  INTGER_NUMBER
+%token  FLOAT_NUMBER
+%token  STRING_IDENTIFIER
+%token  CHAR_IDENTIFIER
+%token  TRUEE FALSEE
 
 %token INT FLOAT CHAR STRING BOOL VOID
 
-%token NULL CONST
+%token NULLL CONST
 
 %token INCREMENT DECREMENT
 
@@ -51,8 +51,8 @@ S : Code                 {}
   ;
 
 
-Code : Code line ';' {}
-     | line ';' {}
+Code : line {}
+     | Code line {}
      ;
 
 
@@ -61,6 +61,8 @@ line : dataTypes ID '=' expression';' {}
       | CONST dataTypes ID '=' expression';' {}
       | ID '=' expression';' {}
       | ifStatement {}
+      | forLoop {}
+      | whileLoop {}
       ;
 
 dataTypes : INT {}
@@ -102,6 +104,8 @@ math3 : '(' math1 ')' {}
 
 ID_OR_NUMBER : INTGER_NUMBER {}
               | FLOAT_NUMBER {}
+              | CHAR_IDENTIFIER {}
+              | STRING_IDENTIFIER {}
               | ID {}
               ;
 
@@ -115,8 +119,8 @@ boolExpression : boolExpression AND boolExpression {}
                 | boolean {}
                 ;
 
-boolean : TRUE {}
-        | FALSE {}
+boolean : TRUEE {}
+        | FALSEE {}
         ;
 
 boolComaparitors : GREATERTHANEQUAL {}
@@ -137,6 +141,9 @@ ifStatement : IF '(' boolExpression ')' '{' Code '}' { }
 /* ########################## LOOPS  ##########################*/
 forLoop : FOR '(' mathExpression | epsilon  ';' boolExpression ';' line ')' '{' Code '}' { }
         ;
+
+whileLoop : WHILE '(' boolExpression ')' '{' Code '}' { }
+          ;
 
 epsilonOrExpression : epsilon {}
                     | expression {}
