@@ -1,15 +1,3 @@
-/* Define If-then-else statement, while loops, repeat-until loops, for loops, switch
-statement. */
-/* Define the following operators: +, -, *, /, %, =, ==, !=, <, >, <=, >=, &&, ||, !, ++, -- */
-/* Define the following data types: int, float, char, string, array, pointer */
-/* Define the following functions: printf, scanf, malloc, free, exit, return, main */
-/* Define the following preprocessor directives: #include, #define, #ifdef, #endif, #ifndef, #else */
-/* Define the following standard libraries: stdio.h, stdlib.h, string.h, math.h, time.h */
-/* Define the following standard constants: NULL, EOF, TRUE, FALSE, PI, E, EXIT_SUCCESS, EXIT_FAILURE */
-/* Define the following standard functions: abs, atof, atoi, atol, cos, sin, tan, exp, log, pow, sqrt, ceil, floor, rand, srand, time, clock, difftime, mktime, localtime, asctime, ctime, strftime, memcpy, memmove, memset, memcmp, strcmp, strncmp, strcpy, strncpy, strcat, strncat, strlen, strchr, strrchr, strstr, strtok, atoi, atol, atof, itoa, ltoa, ftoa, atoi, atol, atof, itoa, ltoa, ftoa, malloc, calloc, realloc, free, exit, return, main */
-/* Define the following standard macros: NULL, EOF, TRUE, FALSE, PI, E, EXIT_SUCCESS, EXIT_FAILURE */
-
-
 %{
     #include "parser.tab.h"
     #include <stdlib.h>
