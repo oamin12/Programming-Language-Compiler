@@ -60,6 +60,8 @@ Code : line {}
 line : dataTypes ID '=' expression';' {}
       | CONST dataTypes ID '=' expression';' {}
       | ID '=' expression';' {}
+      | BREAK ';'
+      | CONTINUE ';'
       | ifStatement {}
       | forLoop {}
       | whileLoop {}
@@ -67,8 +69,8 @@ line : dataTypes ID '=' expression';' {}
       | switchCase {}
       | function {}
       | blockScope {}
-      | functionCall {}
-      | returnStatement {}
+      | functionCall ';' {} 
+      | returnStatement ';' {}
       ;
 
 dataTypes : INT {}
@@ -91,7 +93,7 @@ mathExpression : math1 {}
 /* ########################## MATHEMATICAL EXPRESSIONS  ##########################*/
 /* math1 is + - */
 /* math2 is * / */
-/* math3 is ( ) -ID -NUMBER */
+/* math3 is ( ) -ID -NUMBER ++ID --ID */
 math1 : math1 '+' math2 {}
       | math1 '-' math2 {}
       | math2 {}
@@ -113,6 +115,9 @@ ID_OR_NUMBER : INTGER_NUMBER {}
               | FLOAT_NUMBER {}
               | CHAR_IDENTIFIER {}
               | STRING_IDENTIFIER {}
+              | NULLL {}
+              | INCREMENT ID {}
+              | DECREMENT ID {}
               | ID {}
               ;
 
@@ -159,8 +164,24 @@ caseStatement : CASE INTGER_NUMBER ':' Code {}
 
 
 /* ########################## LOOPS  ##########################*/
-forLoop : FOR '(' mathExpression | epsilon  ';' boolExpression ';' line ')' '{' Code '}' { }
+forLoop : FOR '(' forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' '{' Code '}' { }
         ;
+
+forLoopCondition : boolExpression {}
+                 | epsilon {}
+                 ;
+
+forLoopIncDecExpression : ID '=' expression {}
+                        | INCREMENT ID  {}
+                        | DECREMENT ID  {}
+                        | epsilon {}
+                        ;
+
+forLoopExpression : expression {}
+                  | dataTypes ID '=' expression {}
+                  | ID '=' expression {}
+                  | epsilon {}
+                  ;
 
 whileLoop : WHILE '(' boolExpression ')' '{' Code '}' { }
           ;
@@ -179,7 +200,7 @@ functionParameters : functionParameters ',' dataTypes ID {}
                    | epsilon {}
                    ;
 
-functionCall : ID '(' functionCallParameters ')' ';' { }
+functionCall : ID '(' functionCallParameters ')'{ }
              ;
 
 functionCallParameters : functionCallParameters ',' expression {}
@@ -192,15 +213,9 @@ blockScope : '{' Code '}' { }
            ;
 
 /* ########################## RETURN ##########################*/
-returnStatement : RETURN expression ';' { }
-                | RETURN ';' { }
+returnStatement : RETURN expression { }
+                | RETURN { }
                 ;
-
-
-
-epsilonOrExpression : epsilon {}
-                    | expression {}
-                    ;
 
 epsilon : {}
         ;
