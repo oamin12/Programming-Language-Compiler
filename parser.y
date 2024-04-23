@@ -63,6 +63,12 @@ line : dataTypes ID '=' expression';' {}
       | ifStatement {}
       | forLoop {}
       | whileLoop {}
+      | doWhileLoop {}
+      | switchCase {}
+      | function {}
+      | blockScope {}
+      | functionCall {}
+      | returnStatement {}
       ;
 
 dataTypes : INT {}
@@ -76,6 +82,7 @@ dataTypes : INT {}
 /* Expression */
 expression : mathExpression {}
             | boolExpression {}
+            | functionCall {}
             ;
 
 mathExpression : math1 {}
@@ -137,6 +144,19 @@ ifStatement : IF '(' boolExpression ')' '{' Code '}' { }
             | IF '(' boolExpression ')' '{' Code '}' ELSE ifStatement {  }
             ;
 
+/* ########################## SWITCH CASE ########################## */ 
+switchCase : SWITCH '(' ID ')' '{' caseStatements '}' { }
+           ;
+
+caseStatements : caseStatements caseStatement {}
+               | caseStatement {}
+               ;
+
+caseStatement : CASE INTGER_NUMBER ':' Code {}
+              | DEFAULT ':' Code {}
+              ;
+
+
 
 /* ########################## LOOPS  ##########################*/
 forLoop : FOR '(' mathExpression | epsilon  ';' boolExpression ';' line ')' '{' Code '}' { }
@@ -144,6 +164,39 @@ forLoop : FOR '(' mathExpression | epsilon  ';' boolExpression ';' line ')' '{' 
 
 whileLoop : WHILE '(' boolExpression ')' '{' Code '}' { }
           ;
+
+doWhileLoop : DO '{' Code '}' WHILE '(' boolExpression ')' ';' { }
+            ;
+
+
+/* ########################## FUNCTIONS ##########################*/
+function : dataTypes ID '(' functionParameters ')' '{' Code '}' { }
+         | dataTypes ID '(' functionParameters ')' ';' { }
+         ;
+
+functionParameters : functionParameters ',' dataTypes ID {}
+                   | dataTypes ID {}
+                   | epsilon {}
+                   ;
+
+functionCall : ID '(' functionCallParameters ')' ';' { }
+             ;
+
+functionCallParameters : functionCallParameters ',' expression {}
+                       | expression {}
+                       | epsilon {}
+                       ;
+
+/* ########################## BLOCK SCOPES ##########################*/
+blockScope : '{' Code '}' { }
+           ;
+
+/* ########################## RETURN ##########################*/
+returnStatement : RETURN expression ';' { }
+                | RETURN ';' { }
+                ;
+
+
 
 epsilonOrExpression : epsilon {}
                     | expression {}
