@@ -16,7 +16,9 @@
   void voidd;
 
 }
-%type  E T N
+
+%start S
+
 %token <intg> INTGER_NUMBER
 %token <flt> FLOAT_NUMBER
 %token <str> STRING_IDENTIFIER
@@ -39,53 +41,109 @@
 /* End of Part1 */ 
 %left '='
 %left '+' '-'
-%left '*' '/'
+%left '*' '/' '%'
+
 
 /*Part2 - Production Rules*/
 %%
 
-S : Code                 { printf("%d\n", $1); }
+S : Code                 {}
   ;
 
 
-Code : Code E ';' {}
-     | E ';' {}
+Code : Code line ';' {}
+     | line ';' {}
      ;
 
 
 /* Variable Declaration */
-E :  INT ID '=' INTGER_NUMBER';' { $$ = $4; }
-  | FLOAT ID '=' FLOAT_NUMBER';' { $$ = $4; }
-  | CHAR ID '=' STRING_IDENTIFIER';' { $$ = $4; }
-  | STRING ID '=' CHAR_IDENTIFIER';' { $$ = $4; }
-  | BOOL ID '=' TRUE';' { $$ = $4; }
-  | BOOL ID '=' FALSE';' { $$ = $4; }
-  | ID '=' INTGER_NUMBER';' { $$ = $3; }
-  | ID '=' FLOAT_NUMBER';' { $$ = $3; }
-  | ID '=' STRING_IDENTIFIER';' { $$ = $3; }
-  | ID '=' CHAR_IDENTIFIER';' { $$ = $3; }
-  | ID '=' TRUE';' { $$ = $3; }
-  | ID '=' FALSE';' { $$ = $3; }
-  | T { $$ = $1; }
-  ;
+line : dataTypes ID '=' expression';' {}
+      | CONST dataTypes ID '=' expression';' {}
+      | ID '=' expression';' {}
+      | ifStatement {}
+      ;
 
-T : T '+' N { $$ = $1 + $3; }
-  | T '-' N { $$ = $1 - $3; }
-  | N { $$ = $1; }
-  ;
+dataTypes : INT {}
+          | FLOAT {}
+          | CHAR {}
+          | STRING {}
+          | BOOL {}
+          | VOID {}
+          ;
 
-N : N '*' ID_OR_NUMBER { $$ = $1 * $3; }
-  | N '/' ID_OR_NUMBER { $$ = $1 / $3; }
-  | N '%' ID_OR_NUMBER { $$ = $1 % $3; }
-  | ID_OR_NUMBER
-  | '(' T ')' { $$ = $2; }
-  | '-' ID_OR_NUMBER { $$ = -$2; }
+/* Expression */
+expression : mathExpression {}
+            | boolExpression {}
+            ;
+
+mathExpression : math1 {}
+               ;
+
+/* ########################## MATHEMATICAL EXPRESSIONS  ##########################*/
+/* math1 is + - */
+/* math2 is * / */
+/* math3 is ( ) -ID -NUMBER */
+math1 : math1 '+' math2 {}
+      | math1 '-' math2 {}
+      | math2 {}
+      ;
+
+math2 : math2 '*' ID_OR_NUMBER {}
+      | math2 '/' ID_OR_NUMBER {}
+      | math2 '%' ID_OR_NUMBER {}
+      | math3 {}
+      ;
+
+math3 : '(' math1 ')' {}
+      | '-'math1 {}
+      | ID_OR_NUMBER {}
+      ;
+
 
 ID_OR_NUMBER : INTGER_NUMBER {}
-   | ID {}
+              | FLOAT_NUMBER {}
+              | ID {}
+              ;
 
-   ;
 
+/* ########################## BOOLEAN EXPRESSIONS  ##########################*/
+/* bool1 is > < >= <= */
+boolExpression : boolExpression AND boolExpression {}
+                | boolExpression OR boolExpression {}
+                | NOT boolExpression {}
+                | expression boolComaparitors expression {}
+                | boolean {}
+                ;
+
+boolean : TRUE {}
+        | FALSE {}
+        ;
+
+boolComaparitors : GREATERTHANEQUAL {}
+                | LESSTHANEQUAL {}
+                | GREATERTHAN {}
+                | LESSTHAN {}
+                | NOTEQUAL {}
+                | EQUAL {}
+                ;
+
+/* ########################## IF-ELSE EXPRESSIONS  ##########################*/
+ifStatement : IF '(' boolExpression ')' '{' Code '}' { }
+            | IF '(' boolExpression ')' '{' Code '}' ELSE '{' Code '}' {  }
+            | IF '(' boolExpression ')' '{' Code '}' ELSE ifStatement {  }
+            ;
+
+
+/* ########################## LOOPS  ##########################*/
+forLoop : FOR '(' mathExpression | epsilon  ';' boolExpression ';' line ')' '{' Code '}' { }
+        ;
+
+epsilonOrExpression : epsilon {}
+                    | expression {}
+                    ;
+
+epsilon : {}
+        ;
 
 ID : IDENTIFIER {}
    ;

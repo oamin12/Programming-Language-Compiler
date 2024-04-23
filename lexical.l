@@ -64,12 +64,12 @@ statement. */
 "||" {return OR;}
 "!" {return NOT;}
 
-/* "+" {return PLUS;}
-"-" {return MINUS;}
-"*" {return MULTIPLY;}
-"/" {return DIVIDE;}
-"=" {return ASSIGN;} */
-/* "%" {return MODULO;} */
+    /* "+" {return PLUS;}
+    "-" {return MINUS;}
+    "*" {return MULTIPLY;}
+    "/" {return DIVIDE;}
+    "=" {return ASSIGN;} */
+    /* "%" {return MODULO;} */
 
 
 
