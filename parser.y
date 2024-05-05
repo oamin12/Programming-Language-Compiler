@@ -65,7 +65,7 @@ line : dataTypes ID '=' expression';' {}
       | ifStatement {}
       | forLoop {}
       | whileLoop {}
-      | doWhileLoop {}
+      | doWhileLoop ';' {}
       | switchCase {}
       | function {}
       | blockScope {}
@@ -99,9 +99,9 @@ math1 : math1 '+' math2 {}
       | math2 {}
       ;
 
-math2 : math2 '*' ID_OR_NUMBER {}
-      | math2 '/' ID_OR_NUMBER {}
-      | math2 '%' ID_OR_NUMBER {}
+math2 : math2 '*' math3 {}
+      | math2 '/' math3 {}
+      | math2 '%' math3 {}
       | math3 {}
       ;
 
@@ -144,9 +144,9 @@ boolComaparitors : GREATERTHANEQUAL {}
                 ;
 
 /* ########################## IF-ELSE EXPRESSIONS  ##########################*/
-ifStatement : IF '(' boolExpression ')' '{' Code '}' { }
-            | IF '(' boolExpression ')' '{' Code '}' ELSE '{' Code '}' {  }
-            | IF '(' boolExpression ')' '{' Code '}' ELSE ifStatement {  }
+ifStatement : IF '(' boolExpression ')' blockScope { }
+            | IF '(' boolExpression ')' blockScope ELSE blockScope {  }
+            | IF '(' boolExpression ')' blockScope ELSE ifStatement {  }
             ;
 
 /* ########################## SWITCH CASE ########################## */ 
@@ -157,14 +157,17 @@ caseStatements : caseStatements caseStatement {}
                | caseStatement {}
                ;
 
-caseStatement : CASE INTGER_NUMBER ':' Code {}
+caseStatement : CASE caseIdentifier ':' Code {}
               | DEFAULT ':' Code {}
               ;
 
+caseIdentifier : INTGER_NUMBER {}
+               | CHAR_IDENTIFIER {}
+               ;
 
 
 /* ########################## LOOPS  ##########################*/
-forLoop : FOR '(' forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' '{' Code '}' { }
+forLoop : FOR '(' forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' blockScope { }
         ;
 
 forLoopCondition : boolExpression {}
@@ -174,6 +177,8 @@ forLoopCondition : boolExpression {}
 forLoopIncDecExpression : ID '=' expression {}
                         | INCREMENT ID  {}
                         | DECREMENT ID  {}
+                        | ID INCREMENT {}
+                        | ID DECREMENT {}
                         | epsilon {}
                         ;
 
@@ -183,15 +188,15 @@ forLoopExpression : expression {}
                   | epsilon {}
                   ;
 
-whileLoop : WHILE '(' boolExpression ')' '{' Code '}' { }
+whileLoop : WHILE '(' boolExpression ')' blockScope { }
           ;
 
-doWhileLoop : DO '{' Code '}' WHILE '(' boolExpression ')' ';' { }
+doWhileLoop : DO blockScope WHILE '(' boolExpression ')' { }
             ;
 
 
 /* ########################## FUNCTIONS ##########################*/
-function : dataTypes ID '(' functionParameters ')' '{' Code '}' { }
+function : dataTypes ID '(' functionParameters ')' blockScope { }
          | dataTypes ID '(' functionParameters ')' ';' { }
          ;
 
@@ -210,6 +215,7 @@ functionCallParameters : functionCallParameters ',' expression {}
 
 /* ########################## BLOCK SCOPES ##########################*/
 blockScope : '{' Code '}' { }
+           | '{' '}' { }
            ;
 
 /* ########################## RETURN ##########################*/
