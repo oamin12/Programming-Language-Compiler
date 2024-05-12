@@ -6,11 +6,10 @@ RUN apt-get update && apt-get install -y \
     make \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt update -y && apt install build-essential -y
 WORKDIR /app
 
 COPY . /app
 
-RUN yacc -d parser.y
-RUN lex lexical.l
-RUN cc lex.yy.c y.tab.c -o compiler.out
+RUN make
 CMD ["/bin/bash"]
