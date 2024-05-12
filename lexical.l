@@ -32,25 +32,25 @@
 "return" {yylval.stringValue = strdup(yytext); return RETURN;}
 
 
-"NULL" {return NULLL;}
-"const" {return CONST;}
-"TRUE" {return TRUEE;}
-"FALSE" {return FALSEE;}
+"NULL" {yylval.stringValue = strdup(yytext); return NULLL;}
+"const" {yylval.stringValue = strdup(yytext); return CONST;}
+"TRUE" {yylval.boolValue = 1; return TRUEE;}
+"FALSE" {yylval.boolValue = 0; return FALSEE;}
 
 
-"++" {return INCREMENT;}
-"--" {return DECREMENT;}
-"==" {return EQUAL;}
-"!=" {return NOTEQUAL;}
+"++" {yylval.stringValue = strdup(yytext); return INCREMENT;}
+"--" {yylval.stringValue = strdup(yytext); return DECREMENT;}
+"==" {yylval.stringValue = strdup(yytext); return EQUAL;}
+"!=" {yylval.stringValue = strdup(yytext); return NOTEQUAL;}
 
-"<" {return LESSTHAN;}
-">" {return GREATERTHAN;}
-"<=" {return LESSTHANEQUAL;}
-">=" {return GREATERTHANEQUAL;}
+"<" {yylval.stringValue = strdup(yytext); return LESSTHAN;}
+">" {yylval.stringValue = strdup(yytext); return GREATERTHAN;}
+"<=" {yylval.stringValue = strdup(yytext); return LESSTHANEQUAL;}
+">=" {yylval.stringValue = strdup(yytext); return GREATERTHANEQUAL;}
 
-"&&" {return AND;}
-"||" {return OR;}
-"!" {return NOT;}
+"&&" {yylval.stringValue = strdup(yytext); return AND;}
+"||" {yylval.stringValue = strdup(yytext); return OR;}
+"!" {yylval.stringValue = strdup(yytext); return NOT;}
 
     /* "+" {return PLUS;}
     "-" {return MINUS;}
@@ -58,9 +58,6 @@
     "/" {return DIVIDE;}
     "=" {return ASSIGN;} */
     /* "%" {return MODULO;} */
-
-
-
 
 ";" {return ';';}
 ":" {return ':';}

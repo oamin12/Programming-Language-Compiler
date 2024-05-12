@@ -33,6 +33,30 @@ SymbolTable* SymbolTree::getScopeSymbolTable(string entryName)
     return nullptr;
 }
 
+SymbolEntry* SymbolTree::getEntryByName(string entryName)
+{
+    SymbolTable* table = this->getScopeSymbolTable(entryName);
+    if (table != nullptr)
+    {
+        return table->getEntry(entryName);
+    }
+    return nullptr;
+}
+
+void SymbolTree::addSymbolTableAndBeginScope()
+{
+    SymbolTable* table = new SymbolTable(this->currentTable->scopeName + to_string(this->currentTable->children.size()), this->currentTable, {});
+    this->SymbolTables[table->scopeName] = table;
+    this->currentTable->addChild(table);
+    this->currentTable = table;
+}
+
+void SymbolTree::endCurrentScope(string scopeType)
+{
+    this->currentTable->scopeType = scopeType;
+    this->currentTable = this->currentTable->parent;
+}
+
 SymbolTree::~SymbolTree()
 {
     delete this->globalTable;

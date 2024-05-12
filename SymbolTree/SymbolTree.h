@@ -12,6 +12,9 @@ public:
 
     SymbolTree();
     SymbolTable* getScopeSymbolTable(string entryName);
+    SymbolEntry* getEntryByName(string entryName);
+    void addSymbolTableAndBeginScope();
+    void endCurrentScope(string scopeType);
     SymbolTable* contains(string scopeName);
     ~SymbolTree();
 };

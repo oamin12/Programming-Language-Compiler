@@ -9,14 +9,18 @@ struct SymbolEntry
 {
     string variableName;
     string variableType;
-    string value = "0x0000";
-    bool isConstant = false;
-    bool isInitialised = false;
+    string value;
+    bool isInitialised;
+    bool isConstant;
     bool isUsed = false;
-    SymbolEntry(string Name, string Type)
+    SymbolEntry(string Name, string Type, string value = "0x0000", bool isInitialised = false, bool isConstant = false)
     {
+        cout << "Value is:" << value << endl;
         this->variableName = Name;
         this->variableType = Type;
+        this->value = value;
+        this->isInitialised = isInitialised;
+        this->isConstant = isConstant;
     }
 };
 
@@ -24,6 +28,7 @@ class SymbolTable
 {
 public:
     string scopeName;
+    string scopeType;
     unordered_map<string, SymbolEntry*> table;
     SymbolTable* parent;
     vector<SymbolTable*> children;
@@ -33,5 +38,6 @@ public:
     void addChild(SymbolTable* child);
     bool contains(string entryName);
     SymbolEntry* getEntry(string entryName);
+    void printTable() const;
     ~SymbolTable();
 };

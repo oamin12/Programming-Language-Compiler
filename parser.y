@@ -2,7 +2,9 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
+    #include <string.h>
     #include "SymbolTree/SymbolTree.h"
+    #include "utils.cpp"
     
     void yyerror(char* s);
     int yylex();
@@ -29,20 +31,24 @@
 
 %token <stringValue> INT FLOAT CHAR STRING BOOL VOID
 
-%token NULLL CONST
+%token <stringValue> NULLL CONST
 
-%token INCREMENT DECREMENT
+%token <stringValue> INCREMENT DECREMENT
 
-%token GREATERTHANEQUAL LESSTHANEQUAL GREATERTHAN LESSTHAN NOTEQUAL EQUAL
+%token <stringValue> GREATERTHANEQUAL LESSTHANEQUAL GREATERTHAN LESSTHAN NOTEQUAL EQUAL
 
-%token AND OR NOT
+%token <stringValue> AND OR NOT
 
-%token IF ELSE WHILE FOR DO BREAK CONTINUE RETURN SWITCH CASE DEFAULT
+%token <stringValue> IF ELSE WHILE FOR DO BREAK CONTINUE RETURN SWITCH CASE DEFAULT
 
 %token <idValue> IDENTIFIER
 
-%type <stringValue> dataTypes
+%type <stringValue> dataTypes boolComparators STRING_LITERALS mathExpression boolExpression expression functionCall
+%type <boolValue> boolean
 %type <idValue> ID
+%type <intValue> INT_LITERAL caseIdentifierInt
+%type <floatValue> FLOAT_LITERAL math1 math2 math3
+%type <chrValue> CHAR_LITERAL caseIdentifierChar
 
 /* End of Part1 */ 
 %right '='
@@ -71,11 +77,12 @@ line : dataTypes ID '=' expression';'         {
                                                   printf("Variable already declared\n");
                                                 }else{
                                                   // $2 is the ID and $1 is the data type
-                                                  SymbolEntry* entry = new SymbolEntry($2, $1);
+                                                  SymbolEntry* entry = new SymbolEntry($2, $1, $4, true);
                                             
                                                   // Add the entry to the symbol table
                                                   MotherSymbolTree.currentTable->insert(entry); 
                                                   printf("Variable added to the symbol table\n");
+                                                  MotherSymbolTree.currentTable->printTable();
                                                 }
                                               }
       | CONST dataTypes ID '=' expression';' {
@@ -86,9 +93,7 @@ line : dataTypes ID '=' expression';'         {
                                                   printf("Variable already declared\n");
                                                 }else{
                                                   // $3 is the ID and $2 is the data type
-                                                  SymbolEntry* entry = new SymbolEntry($3, $2);
-                                                  entry->isConstant = true;
-                                            
+                                                  SymbolEntry* entry = new SymbolEntry($3, $2, $5, true, true);
                                                   // Add the entry to the symbol table
                                                   MotherSymbolTree.currentTable->insert(entry); 
                                                   printf("Variable added to the symbol table\n");
@@ -99,7 +104,7 @@ line : dataTypes ID '=' expression';'         {
                                 
                                 SymbolTable* table = MotherSymbolTree.getScopeSymbolTable($1);
                                 if(table == NULL){
-                                  printf("Variable not declared\n");
+                                  printf("Variable is not declared\n");
                                 }else{
                                   SymbolEntry* entry = table->getEntry($1);
                                   if(entry->isConstant){
@@ -122,9 +127,7 @@ line : dataTypes ID '=' expression';'         {
       | returnStatement ';' {}
       ;
 
-dataTypes : INT { $$ = $1; 
-                  printf("Data Type: %s\n", $1);
-                }
+dataTypes : INT { $$ = $1;}
           | FLOAT {$$ = $1;}
           | CHAR {$$ = $1;}
           | STRING {$$ = $1;}
@@ -133,35 +136,91 @@ dataTypes : INT { $$ = $1;
           ;
 
 /* Expression */
-expression : mathExpression {}
+expression : mathExpression {$$ = $1;}
             | boolExpression {}
             | functionCall {}
+            | CHAR_LITERAL { $$ = ConvertFromCharToString($1);}
+            | STRING_LITERALS {$$ = $1;}
             ;
 
-mathExpression : math1 {}
+mathExpression : math1 { $$ = ConvertFromNumberToString($1);}
                ;
 
 /* ########################## MATHEMATICAL EXPRESSIONS  ##########################*/
 /* math1 is + - */
 /* math2 is * / */
 /* math3 is ( ) -ID -NUMBER ++ID --ID */
-math1 : math1 '+' math2 {}
-      | math1 '-' math2 {}
-      | math2 {}
+math1 : math1 '+' math2 {$$ = $1 + $3;}
+      | math1 '-' math2 {$$ = $1 - $3;}
+      | math2 {$$ = $1;}
       ;
 
-math2 : math2 '*' math3 {}
-      | math2 '/' math3 {}
-      | math2 '%' math3 {}
-      | math3 {}
+math2 : math2 '*' math3 {$$ = $1 * $3;}
+      | math2 '/' math3 {$$ = $1 / $3;}
+      | math2 '%' math3 { $$ = (int)$1 % (int)$3;}
+      | math3 {$$ = $1;}
       ;
 
-math3 : '(' math1 ')' {}
-      | '-'math1 {}
-      | ID_OR_NUMBER {}
+math3 : '(' math1 ')' {$$ = $2;}
+      | '-'math1 {$$ = -1 * $2;}
+      | INT_LITERAL {$$ = $1;}
+      | FLOAT_LITERAL {$$ = $1;}
+      | ID {
+              SymbolEntry* entry1 = MotherSymbolTree.getEntryByName($1);    
+              if(!entry1)
+                printf("Variable %s is not declared\n", $1);
+              else if(entry1->variableType != "int" && entry1->variableType != "float")
+                printf("Variable %s is not a number\n", $1);
+              else
+                $$ = stof(entry1->value);     
+      }
       ;
 
+INT_LITERAL : INTGER_NUMBER {$$ = $1; printf("Number is: %d\n", $1);}
+            | INCREMENT ID  { 
+                              SymbolEntry* entry = MotherSymbolTree.getEntryByName($2);
+                              if(entry == NULL)
+                                printf("Variable is not declared\n");
+                              else if (entry->variableType != "int") 
+                                printf("Variable is not of type int\n");
+                              else if (entry->isConstant == true)
+                                printf("Variable is constant\n");
+                              else if(entry->isInitialised == false)
+                                printf("Variable is not initialized\n");
+                              else{
+                                  $$ = stoi(entry->value) + 1;
+                                  entry->value = std::to_string(stoi(entry->value) + 1);
+                              }
+                            }
+            | DECREMENT ID  {
+                              SymbolEntry* entry = MotherSymbolTree.getEntryByName($2);
+                              if(entry == NULL)
+                                printf("Variable is not declared\n");
+                              else if (entry->variableType != "int") 
+                                printf("Variable is not of type int\n");
+                              else if (entry->isConstant == true)
+                                printf("Variable is constant\n");
+                              else if(entry->isInitialised == false)
+                                printf("Variable is not initialized\n");
+                              else{
+                                  $$ = stoi(entry->value) - 1;
+                                  entry->value = std::to_string(stoi(entry->value) - 1);
+                                }
+            }
+            ;
 
+FLOAT_LITERAL : FLOAT_NUMBER {$$ = $1;}
+              ;
+
+CHAR_LITERAL : CHAR_IDENTIFIER {$$ = $1;}
+             ;
+
+STRING_LITERALS : STRING_IDENTIFIER {$$ = $1;}
+                | NULLL {$$ = $1;}
+                | ID {}
+                ;
+
+/* 
 ID_OR_NUMBER : INTGER_NUMBER {}
               | FLOAT_NUMBER {}
               | CHAR_IDENTIFIER {}
@@ -170,7 +229,7 @@ ID_OR_NUMBER : INTGER_NUMBER {}
               | INCREMENT ID {}
               | DECREMENT ID {}
               | ID {}
-              ;
+              ; */
 
 
 /* ########################## BOOLEAN EXPRESSIONS  ##########################*/
@@ -178,47 +237,67 @@ ID_OR_NUMBER : INTGER_NUMBER {}
 boolExpression : boolExpression AND boolExpression {}
                 | boolExpression OR boolExpression {}
                 | NOT boolExpression {}
-                | expression boolComaparitors expression {}
-                | boolean {}
+                | expression boolComparators expression {}
+                | boolean { $$ = ConvertFromNumberToString($1);}
                 ;
 
-boolean : TRUEE {}
-        | FALSEE {}
+boolean : TRUEE {$$ = $1;}
+        | FALSEE {$$ = $1;}
         ;
 
-boolComaparitors : GREATERTHANEQUAL {}
-                | LESSTHANEQUAL {}
-                | GREATERTHAN {}
-                | LESSTHAN {}
-                | NOTEQUAL {}
-                | EQUAL {}
+boolComparators : GREATERTHANEQUAL {$$ = $1;}
+                | LESSTHANEQUAL {$$ = $1;}
+                | GREATERTHAN {$$ = $1;}
+                | LESSTHAN {$$ = $1;}
+                | NOTEQUAL {$$ = $1;}
+                | EQUAL {$$ = $1;}
                 ;
 
 /* ########################## IF-ELSE EXPRESSIONS  ##########################*/
-ifStatement : IF '(' boolExpression ')' blockScope { }
-            | IF '(' boolExpression ')' blockScope ELSE blockScope {  }
-            | IF '(' boolExpression ')' blockScope ELSE ifStatement {  }
+ifStatement : ifScope
+            | ifScope elseScope 
             ;
 
+ifScope : IF '(' boolExpression ')' blockScope  { MotherSymbolTree.endCurrentScope("if"); 
+                                                  printf("Scope End\n"); 
+                                                  MotherSymbolTree.currentTable->printTable();
+                                                }
+        ;
+
+elseScope : ELSE blockScope { MotherSymbolTree.endCurrentScope("else"); 
+                              printf("Scope End\n"); 
+                              MotherSymbolTree.currentTable->printTable();
+                            }
+
+          | ELSE ifStatement { }
+          ;
+
 /* ########################## SWITCH CASE ########################## */ 
-switchCase : SWITCH '(' ID ')' '{' caseStatements '}' { }
+switchCase : SWITCH '(' ID ')' beginScope caseStatements endScope { }
            ;
 
 caseStatements : caseStatements caseStatement {}
                | caseStatement {}
                ;
 
-caseStatement : CASE caseIdentifier ':' Code {}
+caseStatement : CASE caseIdentifierInt ':' Code {}
+              | CASE caseIdentifierChar ':' Code {}
               | DEFAULT ':' Code {}
               ;
 
-caseIdentifier : INTGER_NUMBER {}
-               | CHAR_IDENTIFIER {}
-               ;
+caseIdentifierInt : INTGER_NUMBER {}
+                  ;
+
+caseIdentifierChar : CHAR_IDENTIFIER {}
+                   ;
 
 
 /* ########################## LOOPS  ##########################*/
-forLoop : FOR '(' forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' blockScope { }
+forLoop : FOR '(' forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' blockScope  {  
+                                                                                                        MotherSymbolTree.endCurrentScope("for"); 
+                                                                                                        printf("Scope End\n"); 
+                                                                                                        MotherSymbolTree.currentTable->printTable();
+                                                                                                      }
         ;
 
 forLoopCondition : boolExpression {}
@@ -265,9 +344,15 @@ functionCallParameters : functionCallParameters ',' expression {}
                        ;
 
 /* ########################## BLOCK SCOPES ##########################*/
-blockScope : '{' Code '}' { }
-           | '{' '}' { }
+blockScope : beginScope Code endScope { }
+           | beginScope endScope { }
            ;
+
+beginScope : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();}
+           ;
+
+endScope : '}' {}
+         ;
 
 /* ########################## RETURN ##########################*/
 returnStatement : RETURN expression { }
