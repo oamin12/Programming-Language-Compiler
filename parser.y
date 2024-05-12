@@ -2,30 +2,32 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
+    #include "SymbolTree/SymbolTree.h"
     
     void yyerror(char* s);
     int yylex();
+
+    SymbolTree MotherSymbolTree;
 %}
 
-/* %union {
-  int intg;
-  char* str;
-  float flt;
-  char chr;
-  bool bl;
-  void voidd;
-
-} */
+%union {
+  int intValue;
+  char* stringValue;
+  float floatValue;
+  char chrValue;
+  int boolValue;
+  char* idValue;
+}
 
 %start S
 
-%token  INTGER_NUMBER
-%token  FLOAT_NUMBER
-%token  STRING_IDENTIFIER
-%token  CHAR_IDENTIFIER
-%token  TRUEE FALSEE
+%token <intValue> INTGER_NUMBER
+%token <floatValue> FLOAT_NUMBER
+%token <stringValue> STRING_IDENTIFIER
+%token <chrValue> CHAR_IDENTIFIER
+%token <boolValue> TRUEE FALSEE
 
-%token INT FLOAT CHAR STRING BOOL VOID
+%token <stringValue> INT FLOAT CHAR STRING BOOL VOID
 
 %token NULLL CONST
 
@@ -37,9 +39,13 @@
 
 %token IF ELSE WHILE FOR DO BREAK CONTINUE RETURN SWITCH CASE DEFAULT
 
-%token IDENTIFIER
+%token <idValue> IDENTIFIER
+
+%type <stringValue> dataTypes
+%type <idValue> ID
+
 /* End of Part1 */ 
-%left '='
+%right '='
 %left '+' '-'
 %left '*' '/' '%'
 
@@ -57,9 +63,52 @@ Code : line {}
 
 
 /* Variable Declaration */
-line : dataTypes ID '=' expression';' {}
-      | CONST dataTypes ID '=' expression';' {}
-      | ID '=' expression';' {}
+line : dataTypes ID '=' expression';'         { 
+                                                printf("Variable Declaration: Name: %s, Type: %s\n", $2, $1);
+                                                
+                                                bool isContained = MotherSymbolTree.currentTable->contains($2);
+                                                if(isContained){
+                                                  printf("Variable already declared\n");
+                                                }else{
+                                                  // $2 is the ID and $1 is the data type
+                                                  SymbolEntry* entry = new SymbolEntry($2, $1);
+                                            
+                                                  // Add the entry to the symbol table
+                                                  MotherSymbolTree.currentTable->insert(entry); 
+                                                  printf("Variable added to the symbol table\n");
+                                                }
+                                              }
+      | CONST dataTypes ID '=' expression';' {
+                                                printf("Constant Declaration: Name: %s, Type: %s\n", $3, $2);
+                                                
+                                                bool isContained = MotherSymbolTree.currentTable->contains($3);
+                                                if(isContained){
+                                                  printf("Variable already declared\n");
+                                                }else{
+                                                  // $3 is the ID and $2 is the data type
+                                                  SymbolEntry* entry = new SymbolEntry($3, $2);
+                                                  entry->isConstant = true;
+                                            
+                                                  // Add the entry to the symbol table
+                                                  MotherSymbolTree.currentTable->insert(entry); 
+                                                  printf("Variable added to the symbol table\n");
+                                                }
+                                              }
+      | ID '=' expression';' {
+                                printf("Variable Assignment: Name: %s\n", $1);
+                                
+                                SymbolTable* table = MotherSymbolTree.getScopeSymbolTable($1);
+                                if(table == NULL){
+                                  printf("Variable not declared\n");
+                                }else{
+                                  SymbolEntry* entry = table->getEntry($1);
+                                  if(entry->isConstant){
+                                    printf("Variable is constant\n");
+                                  }else{
+                                    printf("Variable is not constant\n");
+                                  }
+                                }
+                              }
       | BREAK ';'
       | CONTINUE ';'
       | ifStatement {}
@@ -73,12 +122,14 @@ line : dataTypes ID '=' expression';' {}
       | returnStatement ';' {}
       ;
 
-dataTypes : INT {}
-          | FLOAT {}
-          | CHAR {}
-          | STRING {}
-          | BOOL {}
-          | VOID {}
+dataTypes : INT { $$ = $1; 
+                  printf("Data Type: %s\n", $1);
+                }
+          | FLOAT {$$ = $1;}
+          | CHAR {$$ = $1;}
+          | STRING {$$ = $1;}
+          | BOOL {$$ = $1;}
+          | VOID {$$ = $1;}
           ;
 
 /* Expression */
@@ -226,7 +277,7 @@ returnStatement : RETURN expression { }
 epsilon : {}
         ;
 
-ID : IDENTIFIER {}
+ID : IDENTIFIER {$$ = $1;}
    ;
 
 

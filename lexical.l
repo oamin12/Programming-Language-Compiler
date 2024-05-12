@@ -12,24 +12,24 @@
 
 %%
 
-"int" {return INT;}
-"float" {return FLOAT;}
-"char" {return CHAR;}
-"string" {return STRING;}
-"bool" {return BOOL;}
-"void" {return VOID;}
+"int" {yylval.stringValue = strdup(yytext); return INT;}
+"float" {yylval.stringValue = strdup(yytext); return FLOAT;}
+"char" {yylval.stringValue = strdup(yytext); return CHAR;}
+"string" {yylval.stringValue = strdup(yytext); return STRING;}
+"bool" {yylval.stringValue = strdup(yytext); return BOOL;}
+"void" {yylval.stringValue = strdup(yytext); return VOID;}
 
-"if" {return IF;}
-"else" {return ELSE;}
-"while" {return WHILE;}
-"do" {return DO;}
-"for" {return FOR;}
-"switch" {return SWITCH;}
-"case" {return CASE;}
-"default" {return DEFAULT;}
-"break" {return BREAK;}
-"continue" {return CONTINUE;}
-"return" {return RETURN;}
+"if" {yylval.stringValue = strdup(yytext); return IF;}
+"else" {yylval.stringValue = strdup(yytext); return ELSE;}
+"while" {yylval.stringValue = strdup(yytext); return WHILE;}
+"do" {yylval.stringValue = strdup(yytext); return DO;}
+"for" {yylval.stringValue = strdup(yytext); return FOR;}
+"switch" {yylval.stringValue = strdup(yytext); return SWITCH;}
+"case" {yylval.stringValue = strdup(yytext); return CASE;}
+"default" {yylval.stringValue = strdup(yytext); return DEFAULT;}
+"break" {yylval.stringValue = strdup(yytext); return BREAK;}
+"continue" {yylval.stringValue = strdup(yytext); return CONTINUE;}
+"return" {yylval.stringValue = strdup(yytext); return RETURN;}
 
 
 "NULL" {return NULLL;}
@@ -75,11 +75,11 @@
     /* "//" {while(input() != '\n'); return EOL;}
     "/*" {char c; char p = 0; while((c = input()) != 0) {if(p == '*' && c == '/') break; p = c;} return EOL;} */
 
-[a-zA-Z][a-zA-Z0-9_]* {yylval = strdup(yytext); return IDENTIFIER;}
-((0)|([1-9][0-9]*)) {yylval = atoi(yytext); return INTGER_NUMBER;}
-[0-9]*\.[0-9]+ | [0-9]+\.[0-9]* {yylval = atof(yytext); return FLOAT_NUMBER;}
-\"[^\"]*\" {yylval = strdup(yytext); return STRING_IDENTIFIER;}
-\'[^\'\"]\' {yylval = yytext[0]; return CHAR_IDENTIFIER;}
+[a-zA-Z][a-zA-Z0-9_]* {yylval.idValue = strdup(yytext); return IDENTIFIER;}
+((0)|([1-9][0-9]*)) {yylval.intValue = atoi(yytext); return INTGER_NUMBER;}
+[0-9]*\.[0-9]+ | [0-9]+\.[0-9]* {yylval.floatValue = atof(yytext); return FLOAT_NUMBER;}
+\"[^\"]*\" {yylval.stringValue = strdup(yytext); return STRING_IDENTIFIER;}
+\'[^\'\"]\' {yylval.chrValue = yytext[0]; return CHAR_IDENTIFIER;}
 . {return yytext[0];}
 
 %%
