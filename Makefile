@@ -1,7 +1,7 @@
 all: 	
 		flex lexical.l
 		bison -y -d parser.y
-		g++ SymbolTable/SymbolTable.cpp SymbolTree/SymbolTree.cpp y.tab.c lex.yy.c -o compiler.exe
+		g++ SymbolTable/SymbolTable.cpp SymbolTree/SymbolTree.cpp SemanticChecks/SemanticChecker.cpp y.tab.c lex.yy.c -o compiler.exe
 
 clean:  
 		del *.o

@@ -4,12 +4,14 @@
     #include <stdlib.h>
     #include <string.h>
     #include "SymbolTree/SymbolTree.h"
+    #include "SemanticChecks/SemanticChecker.h"
     #include "utils.cpp"
     
     void yyerror(char* s);
     int yylex();
 
     SymbolTree MotherSymbolTree;
+    SemanticChecker sc;
 %}
 
 %union {
@@ -83,6 +85,9 @@ line : dataTypes ID '=' expression';'         {
                                                   MotherSymbolTree.currentTable->insert(entry); 
                                                   printf("Variable added to the symbol table\n");
                                                   MotherSymbolTree.currentTable->printTable();
+
+                                                  // Check if the expression is valid
+                                                  printf("%s %s %s\n",$1, sc.determineType($4), $4);
                                                 }
                                               }
       | CONST dataTypes ID '=' expression';' {
@@ -114,6 +119,20 @@ line : dataTypes ID '=' expression';'         {
                                   }
                                 }
                               }
+      | dataTypes ID ';' { 
+                            printf("Variable Declaration: Name: %s, Type: %s\n", $2, $1);
+                            
+                            bool isContained = MotherSymbolTree.currentTable->contains($2);
+                            if(isContained){
+                              printf("Variable already declared\n");
+                            }else{
+                              // $2 is the ID and $1 is the data type
+                              SymbolEntry* entry = new SymbolEntry($2, $1, "-12345", false);
+                              // Add the entry to the symbol table
+                              MotherSymbolTree.currentTable->insert(entry); 
+                              printf("Variable added to the symbol table\n");
+                            }
+                          }
       | BREAK ';'
       | CONTINUE ';'
       | ifStatement {}
