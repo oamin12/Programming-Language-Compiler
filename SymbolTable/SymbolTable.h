@@ -3,8 +3,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-using namespace std;
 
+using namespace std;
 struct SymbolEntry
 {
     string variableName;
@@ -18,7 +18,14 @@ struct SymbolEntry
         cout << "Value is:" << value << endl;
         this->variableName = Name;
         this->variableType = Type;
-        this->value = value;
+
+        if(Type == "char")
+            this->value = value[0];
+        else if(Type == "int")
+            this->value = to_string((int)stof(value));
+        else
+            this->value = value;
+
         this->isInitialised = isInitialised;
         this->isConstant = isConstant;
     }

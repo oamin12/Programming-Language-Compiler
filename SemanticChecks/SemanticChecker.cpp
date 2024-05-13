@@ -54,6 +54,13 @@ bool SemanticChecker::isChar(char* letter)
     return false;
 }
 
+// bool SemanticChecker::isBool(char* str)
+// {
+//     if(strcmp(str, "true") == 0 || strcmp(str, "false") == 0)
+//         return true;
+//     return false;
+// }
+
 bool SemanticChecker::isAlphaNumeric(char letter)
 {
     if((letter >= 'a' && letter <= 'z') || (letter >= 'A' && letter <= 'Z') || (letter >= '0' && letter <= '9'))
@@ -61,13 +68,12 @@ bool SemanticChecker::isAlphaNumeric(char letter)
     return false;
 }
 
-bool SemanticChecker::matchedTypes(char* type1, char* type2)
+bool SemanticChecker::matchTypes(char* type1, char* type2)
 {
     if((strcmp(type1, type2) == 0) || //same type
         (strcmp(type1, "int") == 0 && strcmp(type2, "float") == 0) ||  //int to float
         (strcmp(type1, "float") == 0 && strcmp(type2, "int") == 0) || //float to int
-        (strcmp(type1, "string") == 0 && strcmp(type2, "char") == 0) || //string to char
-        (strcmp(type1, "char") == 0 && strcmp(type2, "string") == 0)) //char to string
+        (strcmp(type1, "string") == 0 && strcmp(type2, "char") == 0)) //string to char
         return true;
 
     return false;
@@ -89,7 +95,9 @@ char* SemanticChecker::determineType(char* str)
         return (char*)"int";
     else if(isFloat(str))
         return (char*)"float";
-    if(isString(str))
+    // else if(isBool(str))
+    //     return (char*)"bool";
+    else if(isString(str))
         return (char*)"string";
     else if(isChar(str))
         return (char*)"char";

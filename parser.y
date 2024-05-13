@@ -72,22 +72,28 @@ Code : line {}
 
 /* Variable Declaration */
 line : dataTypes ID '=' expression';'         { 
-                                                printf("Variable Declaration: Name: %s, Type: %s\n", $2, $1);
+                                                printf("Variable Declaration: Name: %s, Type: %s, value: %s\n", $2, $1, $4);
                                                 
                                                 bool isContained = MotherSymbolTree.currentTable->contains($2);
                                                 if(isContained){
                                                   printf("Variable already declared\n");
                                                 }else{
-                                                  // $2 is the ID and $1 is the data type
-                                                  SymbolEntry* entry = new SymbolEntry($2, $1, $4, true);
-                                            
-                                                  // Add the entry to the symbol table
-                                                  MotherSymbolTree.currentTable->insert(entry); 
-                                                  printf("Variable added to the symbol table\n");
-                                                  MotherSymbolTree.currentTable->printTable();
+                                                  char* expressionType = sc.determineType($4);
 
-                                                  // Check if the expression is valid
-                                                  printf("%s %s %s\n",$1, sc.determineType($4), $4);
+                                                  if(sc.matchTypes($1, expressionType)){
+                                                    printf("Type Match type1 = %s, type2 = %s\n", $1, expressionType);
+                                                    // $2 is the ID and $1 is the data type
+                                                    SymbolEntry* entry = new SymbolEntry($2, $1, $4, true);
+                                              
+                                                    // Add the entry to the symbol table
+                                                    MotherSymbolTree.currentTable->insert(entry); 
+                                                    printf("Variable added to the symbol table\n");
+                                                    MotherSymbolTree.currentTable->printTable();
+                                                  }
+                                                  else
+                                                    printf("Type Mismatch type1 = %s, type2 = %s\n", $1, expressionType);
+                                                  
+
                                                 }
                                               }
       | CONST dataTypes ID '=' expression';' {

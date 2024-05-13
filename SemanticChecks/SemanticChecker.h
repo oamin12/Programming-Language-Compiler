@@ -22,7 +22,8 @@ public:
     bool isFloat(char*);
     bool isString(char*);
     bool isChar(char*);
-    bool matchedTypes(char*, char*);
+    // bool isBool(char*);
+    bool matchTypes(char*, char*);
 
     char* determineType(char*);
     char* determineType(int);
