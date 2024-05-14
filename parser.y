@@ -6,12 +6,12 @@
     #include "SymbolTree/SymbolTree.h"
     #include "SemanticChecks/SemanticChecker.h"
     #include "utils.cpp"
-    #include "Quadruple/Quadruple.h"
+    #include "Quadraples/Quadraples.h"
     
     void yyerror(char* s);
     int yylex();
 
-    Quadruple quad;
+    Quadraples quad;
 
     SymbolTree MotherSymbolTree;
     SemanticChecker sc;
@@ -88,12 +88,17 @@ line : dataTypes ID '=' expression';'         {
                                                     // $2 is the ID and $1 is the data type
                                                     SymbolEntry* entry = new SymbolEntry($2, $1, $4, true);
                                                     //add to quadruple
-                                                    quad.addQuad("=", $4, "", $2);
-                                              
+                                                    printf("Inserting variable: %s\n", $2);
+                                                    quad.unaryOperation("MOV", $2);
+                                                    quad.resetCount();
+                                                    quad.clearVariablesStack();
+                                                    quad.printQuadraples();
+                                                    
+
                                                     // Add the entry to the symbol table
                                                     MotherSymbolTree.currentTable->insert(entry); 
                                                     printf("Variable added to the symbol table\n");
-                                                    MotherSymbolTree.currentTable->printTable();
+                                                    // MotherSymbolTree.currentTable->printTable();
                                                   }
                                                   else
                                                     printf("Type Mismatch type1 = %s, type2 = %s\n", $1, expressionType);
@@ -110,6 +115,10 @@ line : dataTypes ID '=' expression';'         {
                                                 }else{
                                                   // $3 is the ID and $2 is the data type
                                                   SymbolEntry* entry = new SymbolEntry($3, $2, $5, true, true);
+                                                  //add to quadruple
+                                                  quad.unaryOperation("MOV", $2);
+                                                  quad.resetCount();
+                                                  quad.clearVariablesStack();
                                                   // Add the entry to the symbol table
                                                   MotherSymbolTree.currentTable->insert(entry); 
                                                   printf("Variable added to the symbol table\n");
@@ -123,9 +132,15 @@ line : dataTypes ID '=' expression';'         {
                                   printf("Variable is not declared\n");
                                 }else{
                                   SymbolEntry* entry = table->getEntry($1);
+                                  //add to quadruple
+                                  
                                   if(entry->isConstant){
                                     printf("Variable is constant\n");
                                   }else{
+                                    quad.unaryOperation("MOV", $1);
+                                    quad.printQuadraples();
+                                    quad.resetCount();
+                                    quad.clearVariablesStack();
                                     printf("Variable is not constant\n");
                                   }
                                 }
@@ -180,19 +195,43 @@ mathExpression : math1 { $$ = ConvertFromNumberToString($1);}
 /* math1 is + - */
 /* math2 is * / */
 /* math3 is ( ) -ID -NUMBER ++ID --ID */
-math1 : math1 '+' math2 {$$ = $1 + $3;}
-      | math1 '-' math2 {$$ = $1 - $3;}
+math1 : math1 '+' math2 {
+                          $$ = $1 + $3;
+                          char* label = quad.getCurrentLabel();
+                          quad.binaryOperation("ADD", label);
+                          printf("ADD Label: %s\n", label);
+                          }
+      | math1 '-' math2 {$$ = $1 - $3;
+                          char* label = quad.getCurrentLabel();
+                          quad.binaryOperation("SUB", label);
+                          printf("SUB Label: %s\n", label);
+                          }
       | math2 {$$ = $1;}
       ;
 
-math2 : math2 '*' math3 {$$ = $1 * $3;}
-      | math2 '/' math3 {$$ = $1 / $3;}
-      | math2 '%' math3 { $$ = (int)$1 % (int)$3;}
+math2 : math2 '*' math3 {
+                          $$ = $1 * $3;
+                          char* label = quad.getCurrentLabel();
+                          quad.binaryOperation("MUL", label);
+                          printf("MUL Label: %s\n", label);
+                          }
+      | math2 '/' math3 {$$ = $1 / $3;
+                          char* label = quad.getCurrentLabel();
+                          quad.binaryOperation("DIV", label);
+                          printf("DIV Label: %s\n", label);}
+      | math2 '%' math3 { $$ = (int)$1 % (int)$3;
+                          char* label = quad.getCurrentLabel();
+                          quad.binaryOperation("MOD", label);
+                          printf("MOD Label: %s\n", label);}
       | math3 {$$ = $1;}
       ;
 
 math3 : '(' math1 ')' {$$ = $2;}
-      | '-'math1 {$$ = -1 * $2;}
+      | '-'math1 {$$ = -1 * $2;
+                  char* label = quad.getCurrentLabel();
+                  quad.unaryOperation("NEG", label);
+                  printf("NEG Label: %s\n", label);
+                  }
       | INT_LITERAL {$$ = $1;}
       | FLOAT_LITERAL {$$ = $1;}
       | ID {
@@ -202,11 +241,20 @@ math3 : '(' math1 ')' {$$ = $2;}
               else if(entry1->variableType != "int" && entry1->variableType != "float")
                 printf("Variable %s is not a number\n", $1);
               else
-                $$ = stof(entry1->value);     
+              {
+                $$ = stof(entry1->value);
+                quad.insertVariable($1); 
+              }
+                   
       }
       ;
 
-INT_LITERAL : INTGER_NUMBER {$$ = $1; printf("Number is: %d\n", $1);}
+INT_LITERAL : INTGER_NUMBER {
+                              $$ = $1; printf("Number is: %d\n", $1);
+                              quad.insertVariable(std::to_string($1));
+                              printf("Inserted int variable: %d\n", $1);
+                              
+                            } 
             | INCREMENT ID  { 
                               SymbolEntry* entry = MotherSymbolTree.getEntryByName($2);
                               if(entry == NULL)
@@ -239,13 +287,25 @@ INT_LITERAL : INTGER_NUMBER {$$ = $1; printf("Number is: %d\n", $1);}
             }
             ;
 
-FLOAT_LITERAL : FLOAT_NUMBER {$$ = $1;}
+FLOAT_LITERAL : FLOAT_NUMBER {
+                              $$ = $1;
+                              quad.insertVariable(std::to_string($1));
+                              printf("Inserted float variable: %f\n", $1);
+                              }
               ;
 
-CHAR_LITERAL : CHAR_IDENTIFIER {$$ = $1;}
+CHAR_LITERAL : CHAR_IDENTIFIER {
+                                $$ = $1;
+                                quad.insertVariable(std::to_string($1));
+                                printf("Inserted char variable: %c\n", $1);
+                                }
              ;
 
-STRING_LITERALS : STRING_IDENTIFIER {$$ = $1;}
+STRING_LITERALS : STRING_IDENTIFIER {
+                                    $$ = $1;
+                                    quad.insertVariable($1);
+                                    printf("Inserted string variable: %s\n", $1);
+                                    }
                 | NULLL {$$ = $1;}
                 | ID {}
                 ;

@@ -13,8 +13,15 @@ SemanticChecker::SemanticChecker()
 bool SemanticChecker::isInt(char* str)
 {
     char* temp = str;
+    bool isFirstChar = true;
     while(*temp)
     {
+        if(isFirstChar && *temp == '-')
+        {
+            isFirstChar = false;
+            temp++;
+            continue;
+        }
         if(!isdigit(*temp))
             return false;
         temp++;
@@ -26,8 +33,15 @@ bool SemanticChecker::isFloat(char* str)
 {
     char* temp = str;
     bool decimal = false;
+    bool isFirstChar = true;
     while(*temp)
     {
+        if(isFirstChar && *temp == '-')
+        {
+            isFirstChar = false;
+            temp++;
+            continue;
+        }
         if(!isdigit(*temp))
         {
             if(*temp == '.' && !decimal)
