@@ -59,27 +59,27 @@ void Quadraples::branchingOperation(char* jumpType)
     
     if(jump == ">")
     {
-        jump = "JGT";
+        jump = "JLE";
     }
     else if(jump == "<")
     {
-        jump = "JLT";
+        jump = "JGE";
     }
     else if(jump == "==")
     {
-        jump = "JEQ";
+        jump = "JNE";
     }
     else if(jump == "!=")
     {
-        jump = "JNE";
+        jump = "JE";
     }
     else if(jump == ">=")
     {
-        jump = "JGE";
+        jump = "JLT";
     }
     else if(jump == "<=")
     {
-        jump = "JLE";
+        jump = "JGT";
     }
     
     QuadrapleEntry* entry = new QuadrapleEntry("CMP", arg1, arg2, "", "");
@@ -103,7 +103,7 @@ void Quadraples::jumpOperation()
 {
     string line = getCurrentLine();
     this->lineCount++;
-
+    
     lines.push(line);
 
     QuadrapleEntry* entry = new QuadrapleEntry("JMP", "", "", line);

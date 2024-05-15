@@ -57,8 +57,11 @@
 
 /* End of Part1 */ 
 %right '='
+%right ELSE
 %left '+' '-'
 %left '*' '/' '%'
+
+
 
 
 /*Part2 - Production Rules*/
@@ -341,6 +344,14 @@ Line0:
 c = 1
 Line1:
 
+cmp a b
+jlt Line0
+c = 1
+jmp Line1
+Line0:
+c = 2
+Line1:
+
 */
 
 boolExpression : boolExpression AND boolExpression {}
@@ -369,7 +380,7 @@ ifStatement : ifScope
             | ifScope elseScope 
             ;
 
-ifScope : IF OPENPARENTIF boolExpression CLOSEPARENTIF blockScope  { MotherSymbolTree.endCurrentScope("if"); 
+ifScope : IF OPENPARENTIF boolExpression CLOSEPARENTIF blockScopeIf  { MotherSymbolTree.endCurrentScope("if"); 
                                                   printf("Scope End\n"); 
                                                   MotherSymbolTree.currentTable->printTable();
 
@@ -380,15 +391,13 @@ OPENPARENTIF : '(' {}
             ;
 
 CLOSEPARENTIF : ')' {
-                      quad.addLine();
                     }
                   ;
 
-elseScope : ELSE blockScope { MotherSymbolTree.endCurrentScope("else"); 
+elseScope : ELSE blockScopeElse { MotherSymbolTree.endCurrentScope("else"); 
                               printf("Scope End\n"); 
                               MotherSymbolTree.currentTable->printTable();
-                              quad.jumpOperation();
-
+                              quad.addLine();
                             }
 
           | ELSE ifStatement { }
@@ -473,14 +482,44 @@ blockScope : beginScope Code endScope {
            ;
 
 beginScope : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();
-                    //quad.addLine();
                   }
            ;
 
 endScope : '}' {
-                  //quad.addLine();
-}
+                }
          ;
+
+blockScopeIf : beginScopeIf Code endScopeIf {
+                                       
+ }
+           | beginScopeIf endScopeIf { }
+           ;
+
+beginScopeIf : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();
+                   }
+           ;
+
+endScopeIf : '}' {
+                  quad.jumpOperation();
+                  quad.addLine();
+                 }
+         ;
+
+blockScopeElse : beginScopeElse Code endScopeElse {
+                                       
+ }
+           | beginScopeElse endScopeElse { }
+           ;
+
+beginScopeElse : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();
+                     
+                     }
+           ;
+
+endScopeElse : '}' {
+                   }
+           ;
+
 
 /* ########################## RETURN ##########################*/
 returnStatement : RETURN expression { }
