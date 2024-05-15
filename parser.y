@@ -478,6 +478,7 @@ beginScope : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope
 endScope : '}' {
                   if(quad.getLineCountinStack() >= 1)
                     quad.addLine();
+                    quad.printQuadraples();
 }
          ;
 
