@@ -57,6 +57,7 @@
 
 /* End of Part1 */ 
 %right '='
+%right ELSE
 %left '+' '-'
 %left '*' '/' '%'
 
@@ -324,6 +325,25 @@ ID_OR_NUMBER : INTGER_NUMBER {}
 
 /* ########################## BOOLEAN EXPRESSIONS  ##########################*/
 /* bool1 is > < >= <= */
+
+/*
+if (a > b) {
+  c = 1;
+} else {
+  c = 2;
+}
+
+then
+
+cmp a b
+jgt Line1
+c = 2
+jmp Line2
+Line1: c = 1
+Line2:
+
+*/
+
 boolExpression : boolExpression AND boolExpression {}
                 | boolExpression OR boolExpression {}
                 | NOT boolExpression {}
@@ -335,12 +355,18 @@ boolean : TRUEE {$$ = $1;}
         | FALSEE {$$ = $1;}
         ;
 
-boolComparators : GREATERTHANEQUAL {$$ = $1;}
-                | LESSTHANEQUAL {$$ = $1;}
-                | GREATERTHAN {$$ = $1;}
-                | LESSTHAN {$$ = $1;}
-                | NOTEQUAL {$$ = $1;}
-                | EQUAL {$$ = $1;}
+boolComparators : GREATERTHANEQUAL {$$ = $1;
+                  quad.branchingOperation("GEQ");}
+                | LESSTHANEQUAL {$$ = $1;
+                  quad.branchingOperation("LEQ");}
+                | GREATERTHAN {$$ = $1;
+                  quad.branchingOperation("GRT");}
+                | LESSTHAN {$$ = $1;
+                  quad.branchingOperation("LES");}
+                | NOTEQUAL {$$ = $1;
+                  quad.branchingOperation("NEQ");}
+                | EQUAL {$$ = $1;
+                  quad.branchingOperation("EQU");}
                 ;
 
 /* ########################## IF-ELSE EXPRESSIONS  ##########################*/
@@ -351,12 +377,15 @@ ifStatement : ifScope
 ifScope : IF '(' boolExpression ')' blockScope  { MotherSymbolTree.endCurrentScope("if"); 
                                                   printf("Scope End\n"); 
                                                   MotherSymbolTree.currentTable->printTable();
+                                                  
                                                 }
         ;
 
 elseScope : ELSE blockScope { MotherSymbolTree.endCurrentScope("else"); 
                               printf("Scope End\n"); 
                               MotherSymbolTree.currentTable->printTable();
+                              quad.jumpOperation();
+
                             }
 
           | ELSE ifStatement { }
@@ -434,14 +463,22 @@ functionCallParameters : functionCallParameters ',' expression {}
                        ;
 
 /* ########################## BLOCK SCOPES ##########################*/
-blockScope : beginScope Code endScope { }
+blockScope : beginScope Code endScope {
+                                      
+ }
            | beginScope endScope { }
            ;
 
-beginScope : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();}
+beginScope : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();
+                    if(quad.getLineCountinStack() >= 2)
+                      quad.addLine();
+                  }
            ;
 
-endScope : '}' {}
+endScope : '}' {
+                  if(quad.getLineCountinStack() >= 1)
+                    quad.addLine();
+}
          ;
 
 /* ########################## RETURN ##########################*/

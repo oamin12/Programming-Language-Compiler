@@ -45,12 +45,65 @@ void Quadraples::binaryOperation(char* operation, char* result)
     this->insertVariable(res);
 }
 
+void Quadraples::branchingOperation(char* jumpType)
+{
+    string line = getCurrentLine();
+    this->lineCount++;
+
+    lines.push(line);
+
+    string arg2 = labels.top();
+    labels.pop();
+    string arg1 = labels.top();
+    labels.pop();
+    
+    QuadrapleEntry* entry = new QuadrapleEntry("CMP", arg1, arg2, "", "");
+    QuadrapleEntry* lineEntry = new QuadrapleEntry(jumpType, "", "", line);
+
+    this->insertEntry(entry);
+    this->insertEntry(lineEntry);
+}
+//after this is called we have
+//CMP arg1 arg2
+//JMP/JLT/JGT/JEQ/JNE line
+
+void Quadraples::addLine()
+{
+    string line = lines.top();
+    lines.pop();
+    QuadrapleEntry* entry = new QuadrapleEntry("", "", "", "",line);
+    this->insertEntry(entry);
+}
+
+void Quadraples::jumpOperation()
+{
+    string line = getCurrentLine();
+    this->lineCount++;
+
+    lines.push(line);
+
+    QuadrapleEntry* entry = new QuadrapleEntry("JMP", "", "", line);
+    this->insertEntry(entry);
+}
+//after this is called we have
+//JMP line
+    
+
+
 char* Quadraples::getCurrentLabel()
 {
     std::string label = "T" + std::to_string(this->entryCount);
     char* labelPtr = new char[label.length() + 1]; // +1 for null terminator
     strcpy(labelPtr, label.c_str());
     return labelPtr;
+}
+
+char* Quadraples::getCurrentLine()
+{
+    std::string line = "Line" + std::to_string(this->lineCount);
+    char* linePtr = new char[line.length() + 1]; // +1 for null terminator
+    strcpy(linePtr, line.c_str());
+    return linePtr;
 }
 
 void Quadraples::clearVariablesStack()
@@ -82,6 +135,10 @@ void Quadraples::resetLabelCount()
     this->labelCount = 0;
 }
 
+int Quadraples::getLineCountinStack()
+{
+    return lines.size();
+}
 
 void Quadraples::printQuadraples() const
 {

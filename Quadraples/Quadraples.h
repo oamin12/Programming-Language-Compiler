@@ -38,7 +38,10 @@ private:
     list<QuadrapleEntry*> quadraples;
     int entryCount = 0;
     int labelCount = 0;
+    int lineCount = 0;
     stack<string> labels;
+    stack<string> lines; // for branching statements line1: line2: etc
+    
 
     
     void incrementCount();
@@ -50,8 +53,13 @@ public:
     void insertVariable(string name);
     void unaryOperation(char* operation, char* result);
     void binaryOperation(char* operation, char* result);
+    void branchingOperation(char* jumpType);
+    void addLine();
+    void jumpOperation();
     void clearVariablesStack();
     char* getCurrentLabel();
+    char* getCurrentLine();
+    int  getLineCountinStack();
     void printQuadraples() const;
     void resetCount();
     void resetLabelCount();
