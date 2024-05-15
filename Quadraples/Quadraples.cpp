@@ -11,6 +11,12 @@ void Quadraples::insertEntry(QuadrapleEntry* entry)
     this->incrementCount();
 }
 
+void Quadraples::insertEntry(string operation, string arg1, string arg2, string result)
+{
+    QuadrapleEntry* entry = new QuadrapleEntry(operation, arg1, arg2, result);
+    this->insertEntry(entry);
+}
+
 void Quadraples::insertVariable(string name)
 {
     labels.push(name);
@@ -97,6 +103,19 @@ void Quadraples::addLine()
     lines.pop();
     QuadrapleEntry* entry = new QuadrapleEntry(line, "", "", "");
     this->insertEntry(entry);
+}
+
+void Quadraples::addLineStart()
+{
+    string line = getCurrentLine();
+    QuadrapleEntry* entry = new QuadrapleEntry(line + ":", "", "", "");
+    this->insertEntry(entry);
+    lines.push(line);
+}
+
+void Quadraples::incrementLineCount()
+{
+    this->lineCount++;
 }
 
 void Quadraples::jumpOperation()

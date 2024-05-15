@@ -50,11 +50,14 @@ private:
 public:
     Quadraples();
     void insertEntry(QuadrapleEntry* entry);
+    void insertEntry(string operation, string arg1, string arg2, string result);
     void insertVariable(string name);
     void unaryOperation(char* operation, char* result);
     void binaryOperation(char* operation, char* result);
     void branchingOperation(char* jumpType);
     void addLine();
+    void addLineStart();
+    void incrementLineCount();
     void jumpOperation();
     void clearVariablesStack();
     char* getCurrentLabel();

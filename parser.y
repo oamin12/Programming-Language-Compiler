@@ -48,12 +48,12 @@
 
 %token <idValue> IDENTIFIER
 
-%type <stringValue> dataTypes boolComparators STRING_LITERALS mathExpression boolExpression expression functionCall
+%type <stringValue> dataTypes boolComparators STRING_LITERALS mathExpression boolExpression expression functionCall beginScope blockScope
 %type <boolValue> boolean
 %type <idValue> ID
 %type <intValue> INT_LITERAL caseIdentifierInt
 %type <floatValue> FLOAT_LITERAL math1 math2 math3
-%type <chrValue> CHAR_LITERAL caseIdentifierChar
+%type <chrValue> CHAR_LITERAL caseIdentifierChar 
 
 /* End of Part1 */ 
 %right '='
@@ -71,7 +71,9 @@ S : Code                 {}
   ;
 
 
-Code : line { quad.printQuadraples();}
+Code : line { 
+            quad.printQuadraples();
+            }
      | Code line {}
      ;
 
@@ -449,10 +451,20 @@ forLoopExpression : expression {}
                   | epsilon {}
                   ;
 
-whileLoop : WHILE '(' boolExpression ')' blockScope { }
+whileLoop : whileLabel '(' boolExpression ')' blockScope { 
+                                                      char* label = quad.getCurrentLine();
+                                                      quad.insertEntry("JMP", label, "", "");
+                                                      quad.addLine();
+                                                    }
           ;
 
-doWhileLoop : DO blockScope WHILE '(' boolExpression ')' { }
+whileLabel : WHILE { 
+                    quad.addLineStart();
+                  }
+          ;
+
+doWhileLoop : DO blockScope WHILE '(' boolExpression ')' { 
+                                                          }
             ;
 
 
@@ -476,12 +488,17 @@ functionCallParameters : functionCallParameters ',' expression {}
 
 /* ########################## BLOCK SCOPES ##########################*/
 blockScope : beginScope Code endScope {
-                                       
- }
-           | beginScope endScope { }
+                                        $$ = $1;
+                                      }
+           | beginScope endScope { 
+                                      $$ = $1;
+                                  }
            ;
 
-beginScope : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();
+beginScope : '{' {  MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); 
+                    MotherSymbolTree.currentTable->printTable();
+                    $$ = quad.getCurrentLine();
+                    quad.addLineStart();
                   }
            ;
 
