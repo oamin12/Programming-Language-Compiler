@@ -57,7 +57,6 @@
 
 /* End of Part1 */ 
 %right '='
-%right ELSE
 %left '+' '-'
 %left '*' '/' '%'
 
@@ -69,7 +68,7 @@ S : Code                 {}
   ;
 
 
-Code : line {}
+Code : line { quad.printQuadraples();}
      | Code line {}
      ;
 
@@ -93,7 +92,6 @@ line : dataTypes ID '=' expression';'         {
                                                     quad.unaryOperation("MOV", $2);
                                                     quad.resetCount();
                                                     quad.clearVariablesStack();
-                                                    quad.printQuadraples();
                                                     
 
                                                     // Add the entry to the symbol table
@@ -182,7 +180,7 @@ dataTypes : INT { $$ = $1;}
           ;
 
 /* Expression */
-expression : mathExpression {$$ = $1;}
+expression : mathExpression {$$ = $1; }
             | boolExpression {}
             | functionCall {}
             | CHAR_LITERAL { $$ = ConvertFromCharToString($1);}
@@ -336,18 +334,21 @@ if (a > b) {
 then
 
 cmp a b
-jgt Line1
+jgt Line0
 c = 2
-jmp Line2
-Line1: c = 1
-Line2:
+jmp Line1
+Line0: 
+c = 1
+Line1:
 
 */
 
 boolExpression : boolExpression AND boolExpression {}
                 | boolExpression OR boolExpression {}
                 | NOT boolExpression {}
-                | expression boolComparators expression {}
+                | expression boolComparators expression {
+                                                          quad.branchingOperation($2);
+                                                        }
                 | boolean { $$ = ConvertFromNumberToString($1);}
                 ;
 
@@ -355,18 +356,12 @@ boolean : TRUEE {$$ = $1;}
         | FALSEE {$$ = $1;}
         ;
 
-boolComparators : GREATERTHANEQUAL {$$ = $1;
-                  quad.branchingOperation("GEQ");}
-                | LESSTHANEQUAL {$$ = $1;
-                  quad.branchingOperation("LEQ");}
-                | GREATERTHAN {$$ = $1;
-                  quad.branchingOperation("GRT");}
-                | LESSTHAN {$$ = $1;
-                  quad.branchingOperation("LES");}
-                | NOTEQUAL {$$ = $1;
-                  quad.branchingOperation("NEQ");}
-                | EQUAL {$$ = $1;
-                  quad.branchingOperation("EQU");}
+boolComparators : GREATERTHANEQUAL {$$ = $1;}
+                | LESSTHANEQUAL {$$ = $1;}
+                | GREATERTHAN {$$ = $1;}
+                | LESSTHAN {$$ = $1;}
+                | NOTEQUAL {$$ = $1;}
+                | EQUAL {$$ = $1;}
                 ;
 
 /* ########################## IF-ELSE EXPRESSIONS  ##########################*/
@@ -374,12 +369,20 @@ ifStatement : ifScope
             | ifScope elseScope 
             ;
 
-ifScope : IF '(' boolExpression ')' blockScope  { MotherSymbolTree.endCurrentScope("if"); 
+ifScope : IF OPENPARENTIF boolExpression CLOSEPARENTIF blockScope  { MotherSymbolTree.endCurrentScope("if"); 
                                                   printf("Scope End\n"); 
                                                   MotherSymbolTree.currentTable->printTable();
-                                                  
+
                                                 }
         ;
+
+OPENPARENTIF : '(' {}
+            ;
+
+CLOSEPARENTIF : ')' {
+                      quad.addLine();
+                    }
+                  ;
 
 elseScope : ELSE blockScope { MotherSymbolTree.endCurrentScope("else"); 
                               printf("Scope End\n"); 
@@ -464,21 +467,18 @@ functionCallParameters : functionCallParameters ',' expression {}
 
 /* ########################## BLOCK SCOPES ##########################*/
 blockScope : beginScope Code endScope {
-                                      
+                                       
  }
            | beginScope endScope { }
            ;
 
 beginScope : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();
-                    if(quad.getLineCountinStack() >= 2)
-                      quad.addLine();
+                    //quad.addLine();
                   }
            ;
 
 endScope : '}' {
-                  if(quad.getLineCountinStack() >= 1)
-                    quad.addLine();
-                    quad.printQuadraples();
+                  //quad.addLine();
 }
          ;
 
