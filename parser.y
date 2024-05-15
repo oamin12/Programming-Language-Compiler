@@ -45,7 +45,7 @@
 
 %token <idValue> IDENTIFIER
 
-%type <stringValue> dataTypes boolComparators STRING_LITERALS mathExpression boolExpression expression functionCall
+%type <stringValue> dataTypes boolComparators STRING_LITERALS mathExpression boolExpression expression functionCall returnStatement
 %type <boolValue> boolean
 %type <idValue> ID
 %type <intValue> INT_LITERAL caseIdentifierInt
@@ -122,6 +122,10 @@ line : dataTypes ID '=' expression';'         {
                                     printf("Variable is constant\n");
                                   }else{
                                     printf("Variable is not constant\n");
+                                    entry->value = $3;
+                                    entry->isInitialised = true;
+                                    printf("Variable intialized to the symbol table\n");
+                                    MotherSymbolTree.currentTable->printTable();
                                   }
                                 }
                               }
@@ -343,10 +347,18 @@ forLoopExpression : expression {}
                   | epsilon {}
                   ;
 
-whileLoop : WHILE '(' boolExpression ')' blockScope { }
+whileLoop : WHILE '(' boolExpression ')' blockScope {
+                                                      MotherSymbolTree.endCurrentScope("while"); 
+                                                      printf("Scope End\n"); 
+                                                      MotherSymbolTree.currentTable->printTable();
+                                                    }
           ;
 
-doWhileLoop : DO blockScope WHILE '(' boolExpression ')' { }
+doWhileLoop : DO blockScope WHILE '(' boolExpression ')' {
+                                                      MotherSymbolTree.endCurrentScope("dowhile"); 
+                                                      printf("Scope End\n"); 
+                                                      MotherSymbolTree.currentTable->printTable();
+                                                    }
             ;
 
 
@@ -380,7 +392,8 @@ endScope : '}' {}
          ;
 
 /* ########################## RETURN ##########################*/
-returnStatement : RETURN expression { }
+returnStatement : RETURN expression { $$= $2;
+}
                 | RETURN { }
                 ;
 
