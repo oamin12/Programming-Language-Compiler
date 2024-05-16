@@ -44,7 +44,8 @@ private:
     stack<string> lines; // for branching statements line1: line2: etc
     list<string> lines_list; // we use it to pop back the lines for the if else statements
     stack<string> loops; // for loops
-
+    ///Switch case
+    list<string> casesIDs;
     
     void incrementCount();
     void incrementLabelCount();
@@ -54,6 +55,7 @@ public:
     void insertEntry(QuadrapleEntry* entry);
     void insertEntry(string operation, string arg1, string arg2, string result);
     void insertVariable(string name);
+    void popVariable();
     void unaryOperation(char* operation, char* result);
     void binaryOperation(char* operation, char* result);
     void branchingOperation(char* jumpType);
@@ -64,6 +66,7 @@ public:
 
     void startLoop();
     void endLoop();
+    void endForLoop(char* line);
     
     void incrementLineCount();
     void jumpOperation();
@@ -75,6 +78,15 @@ public:
     void printQuadraples() const;
     void resetCount();
     void resetLabelCount();
+
+    //Switch case
+    void insertCase(char* caseValue);
+    void jumpStartCase();
+    void jumpEndCase();
+    void addLineCase();
+    void insertCaseID(char* caseValue);
+    void processCaseIds(char* switchValue);
+
     ~Quadraples();
 };
 

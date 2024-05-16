@@ -22,6 +22,11 @@ void Quadraples::insertVariable(string name)
     labels.push(name);
 }
 
+void Quadraples::popVariable()
+{
+    labels.pop();
+}
+
 void Quadraples::unaryOperation(char* operation, char* result)
 {
     string res(result);
@@ -144,6 +149,31 @@ void Quadraples::endLoop()
     this->insertEntry(entry2);
 }
 
+void Quadraples::endForLoop(char *line)
+{
+    
+    string temp(line);
+    if(temp.find("INC ") != string::npos)
+    {
+        string substring = temp.substr(4);
+        QuadrapleEntry* entry = new QuadrapleEntry("INC", substring, "", "");
+        this->insertEntry(entry);
+    }
+    else if(temp.find("DEC ") != string::npos)
+    {
+        string substring = temp.substr(4);
+        QuadrapleEntry* entry = new QuadrapleEntry("DEC", substring, "", "");
+        this->insertEntry(entry);
+    }
+    else if(temp != "")
+    {
+        unaryOperation("MOV", line);
+        
+    }
+    
+    endLoop();
+}
+
 void Quadraples::incrementLineCount()
 {
     this->lineCount++;
@@ -160,8 +190,55 @@ void Quadraples::jumpOperation()
 }
 //after this is called we have
 //JMP line
-    
 
+void Quadraples::insertCase(char* caseValue)
+{   
+    string cassee(caseValue);
+    QuadrapleEntry* entry = new QuadrapleEntry("CASE", cassee + ":", "", "");
+    this->insertEntry(entry);
+}
+
+void Quadraples::jumpStartCase()
+{
+    QuadrapleEntry* entry = new QuadrapleEntry("JMP", "Startswitch", "", "");
+    this->insertEntry(entry);
+}
+
+void Quadraples::jumpEndCase()
+{
+    QuadrapleEntry* entry = new QuadrapleEntry("JMP", "Endcase", "", "");
+    this->insertEntry(entry);
+}
+
+void Quadraples::addLineCase()
+{
+    QuadrapleEntry* entry = new QuadrapleEntry("Endcase:", "", "", "");
+    this->insertEntry(entry);
+}
+
+void Quadraples::insertCaseID(char* caseValue)
+{
+    string cassee(caseValue);
+    casesIDs.push_back(cassee);
+}
+
+void Quadraples::processCaseIds(char* switchValue)
+{
+    QuadrapleEntry* entry = new QuadrapleEntry("Startswitch:", "", "", "");
+    this->insertEntry(entry);
+    for (auto cassee : casesIDs)
+    {
+        QuadrapleEntry* entry = new QuadrapleEntry("CMP", cassee, switchValue, "", "");
+        this->insertEntry(entry);
+        QuadrapleEntry* entry2 = new QuadrapleEntry("JEQ", "", "", "case " + cassee);
+        this->insertEntry(entry2);
+        
+    }
+    //default case
+    QuadrapleEntry* entry3 = new QuadrapleEntry("JMP", "", "", "default");
+    this->insertEntry(entry3);
+    casesIDs.clear();
+}
 
 char* Quadraples::getCurrentLabel()
 {
