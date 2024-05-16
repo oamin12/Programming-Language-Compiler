@@ -475,15 +475,14 @@ boolComparators : GREATERTHANEQUAL {$$ = $1;}
                 ;
 
 /* ########################## IF-ELSE EXPRESSIONS  ##########################*/
-ifStatement : ifScope
+ifStatement : ifScope { quad.addLine2();}
             | ifScope elseScope 
             ;
 
 ifScope : IF OPENPARENTIF boolExpression CLOSEPARENTIF blockScope  { MotherSymbolTree.endCurrentScope("if"); 
                                                   printf("Scope End\n"); 
                                                   MotherSymbolTree.currentTable->printTable();
-                                                  quad.jumpOperation();
-                                                  quad.addLine();
+                                                  
 
                                                 }
         ;
@@ -495,13 +494,18 @@ CLOSEPARENTIF : ')' {
                     }
                   ;
 
-elseScope : ELSE blockScope { MotherSymbolTree.endCurrentScope("else"); 
+elseScope : ElseLabel blockScope { MotherSymbolTree.endCurrentScope("else"); 
                               printf("Scope End\n"); 
                               MotherSymbolTree.currentTable->printTable();
-                              quad.addLine();
+                              quad.addLine2();
                             }
 
-          | ELSE ifStatement { }
+          | ElseLabel ifStatement { }
+          ;
+ElseLabel : ELSE { 
+                    quad.jumpOperation();
+                    quad.addLine2();
+                  }
           ;
 
 /* ########################## SWITCH CASE ########################## */ 
@@ -693,7 +697,7 @@ whileLoop : whileLabel '(' boolExpression ')' blockScope {
                                                       MotherSymbolTree.currentTable->printTable();
                                                       char* label = quad.getCurrentLine();
                                                       quad.insertEntry("JMP", label, "", "");
-                                                      quad.addLine();
+                                                      quad.addLine2();
                                                     }
           ;
 whileLabel : WHILE { 
