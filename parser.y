@@ -349,7 +349,7 @@ STRING_LITERALS : STRING_IDENTIFIER {$$ = $1;}
 
 boolExpression : boolExpression AND boolExpression { $$ = ANDing($1, $3);}
                 | boolExpression OR boolExpression { $$ = ORing($1, $3);}
-                | NOT boolExpression { $$ = NOTing($1, $2);}
+                | NOT boolExpression { $$ = NOTing($2);}
                 | expression boolComparators expression { $$ = CompareValues($1, $3, $2);}
                 | boolean { $$ = ConvertFromNumberToString($1);}
                 | ID {
@@ -361,7 +361,7 @@ boolExpression : boolExpression AND boolExpression { $$ = ANDing($1, $3);}
                         else if(entry1->variableType != "int" && entry1->variableType != "float" && entry1->variableType != "bool")
                           printf("Variable %s is not a boolean\n", $1);
                         else
-                          $$ = entry1->value.c_str();     
+                          $$ = ConvertFromNumberToString(stoi(entry1->value));     
                       }
                 ;
 
@@ -478,7 +478,7 @@ forLoopIncDecExpression : ID '=' expression {$$ = $3;}
                               else if(entry->isInitialised == false)
                                 printf("Variable is not initialized\n");
                               else{
-                                  $$ = stoi(entry->value) - 1;
+                                  $$ = ConvertFromNumberToString(stoi(entry->value) + 1);
                                   entry->value = std::to_string(stoi(entry->value) + 1);
                                 }
                           }
@@ -495,7 +495,7 @@ forLoopIncDecExpression : ID '=' expression {$$ = $3;}
                               else if(entry->isInitialised == false)
                                 printf("Variable is not initialized\n");
                               else{
-                                  $$ = stoi(entry->value) - 1;
+                                  $$ = ConvertFromNumberToString(stoi(entry->value) - 1);
                                   entry->value = std::to_string(stoi(entry->value) - 1);
                                 }
                           }
@@ -512,7 +512,7 @@ forLoopIncDecExpression : ID '=' expression {$$ = $3;}
                               else if(entry->isInitialised == false)
                                 printf("Variable is not initialized\n");
                               else{
-                                  $$ = stoi(entry->value);
+                                  $$ = ConvertFromNumberToString(stoi(entry->value));
                                   entry->value = std::to_string(stoi(entry->value) + 1);
                                 }
                           }
@@ -529,7 +529,7 @@ forLoopIncDecExpression : ID '=' expression {$$ = $3;}
                               else if(entry->isInitialised == false)
                                 printf("Variable is not initialized\n");
                               else{
-                                  $$ = stoi(entry->value);
+                                  $$ = ConvertFromNumberToString(stoi(entry->value));
                                   entry->value = std::to_string(stoi(entry->value) - 1);
                                 }
                           }
