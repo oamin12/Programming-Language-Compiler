@@ -577,10 +577,9 @@ bracketBegin : '(' { MotherSymbolTree.addSymbolTableAndBeginScope();
                     MotherSymbolTree.currentTable->printTable();}
              ;
 forLoopCondition : boolExpression {}
-                 | epsilon {}
                  ;
 
-forLoopIncDecExpression : ID '=' expression {$$ = $1; printf("hereee %s\n", $1); }
+forLoopIncDecExpression : ID '=' expression {$$ = $1;}
                         | INCREMENT ID  {
                           {
                               SymbolEntry* entry = MotherSymbolTree.getEntryByName($2);
@@ -686,9 +685,9 @@ forLoopExpression : dataTypes ID '=' expression {
                                                     MotherSymbolTree.currentTable->printTable();
 
                                                     quad.unaryOperation("MOV", $2);
-                                                    quad.resetCount();
-                                                    quad.clearVariablesStack();
-
+                                                    quad.resetLabelCount();
+                                                    //quad.clearVariablesStack();
+                                                    quad.popVariable();
                                                     quad.startLoop();
                                                   }
                                                   else
@@ -711,9 +710,9 @@ forLoopExpression : dataTypes ID '=' expression {
                                     MotherSymbolTree.currentTable->printTable();
 
                                     quad.unaryOperation("MOV", $1);
-                                    quad.resetCount();
-                                    quad.clearVariablesStack();
-
+                                    quad.resetLabelCount();
+                                    //quad.clearVariablesStack();
+                                    quad.popVariable();
                                     quad.startLoop();
                                   }
                                 }
