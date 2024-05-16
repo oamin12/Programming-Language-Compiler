@@ -10,6 +10,8 @@
     
     void yyerror(char* s);
     int yylex();
+    char* caseIdentifier;
+    char* switchIdentifier;
 
     Quadraples quad;
 
@@ -50,7 +52,7 @@
 
 %type <stringValue> dataTypes boolComparators STRING_LITERALS mathExpression boolExpression expression functionCall blockScope returnStatement forLoopIncDecExpression beginScope
 %type <boolValue> boolean
-%type <idValue> ID
+%type <idValue> ID IDCase
 %type <intValue> INT_LITERAL caseIdentifierInt
 %type <floatValue> FLOAT_LITERAL math1 math2 math3
 %type <chrValue> CHAR_LITERAL caseIdentifierChar 
@@ -509,7 +511,7 @@ ElseLabel : ELSE {
           ;
 
 /* ########################## SWITCH CASE ########################## */ 
-switchCase : SWITCH '(' ID ')' beginScope caseStatements endScope { 
+switchCase : SWITCH '(' IDCase ')' beginScopeCase caseStatements endScope { 
                                                                     SymbolEntry* entry = MotherSymbolTree.getEntryByName($3);
                                                                     if(entry == NULL)
                                                                       printf("Variable is not declared\n");
@@ -520,8 +522,21 @@ switchCase : SWITCH '(' ID ')' beginScope caseStatements endScope {
                                                                     MotherSymbolTree.endCurrentScope("switch"); 
                                                                     printf("Scope End\n"); 
                                                                     MotherSymbolTree.currentTable->printTable();}
+                                                                    quad.processCaseIds(switchIdentifier);
+                                                                    quad.addLineCase();
+
                                                                   }
            ;
+
+beginScopeCase : beginScope { 
+                            quad.jumpStartCase();
+                            }
+               ;
+
+IDCase : IDENTIFIER { $$ = $1;
+                      switchIdentifier = $1;
+                    }
+       ;
 
 caseStatements : caseStatements caseStatement {}
                | caseStatement {}
@@ -531,28 +546,44 @@ caseStatement : CASE caseIdentifierInt beginCase Code {
                                                 MotherSymbolTree.endCurrentScope("case"); 
                                                 printf("Scope End\n"); 
                                                 MotherSymbolTree.currentTable->printTable();
+                                                quad.jumpEndCase();
                                                 }
               | CASE caseIdentifierChar beginCase Code { 
                                                 MotherSymbolTree.endCurrentScope("case"); 
                                                 printf("Scope End\n"); 
                                                 MotherSymbolTree.currentTable->printTable();
+                                                quad.jumpEndCase();
                                                 }
-              | DEFAULT beginCase Code {
+              | DefaultIdentifier beginCase Code {
                                   MotherSymbolTree.endCurrentScope("case"); 
                                   printf("Scope End\n"); 
                                   MotherSymbolTree.currentTable->printTable();
+                                  quad.jumpEndCase();
                                   }
               ;
 
-beginCase : ':' { MotherSymbolTree.addSymbolTableAndBeginScope(); 
-                  printf("Scope Begin\n"); 
-                  MotherSymbolTree.currentTable->printTable();}
-          ;
-
-caseIdentifierInt : INTGER_NUMBER {$$ = $1;}
+DefaultIdentifier : DEFAULT { caseIdentifier = "default";}
                   ;
 
-caseIdentifierChar : CHAR_IDENTIFIER {$$ = $1;}
+beginCase : ':' { MotherSymbolTree.addSymbolTableAndBeginScope(); 
+                  printf("Scope Begin\n"); 
+                  MotherSymbolTree.currentTable->printTable();
+                  quad.insertCase(caseIdentifier);
+                  }
+          ;
+
+caseIdentifierInt : INTGER_NUMBER {$$ = $1;
+                                  caseIdentifier = ConvertFromNumberToString($1);
+                                  quad.insertCaseID(caseIdentifier); // for the cmp process
+                                  }
+                                  
+                  ;
+
+caseIdentifierChar : CHAR_IDENTIFIER {$$ = $1;
+                                      caseIdentifier = ConvertFromCharToString($1);
+                                      quad.insertCaseID(caseIdentifier); // for the cmp process
+                                      }
+                    ;
                    ;
 
 
