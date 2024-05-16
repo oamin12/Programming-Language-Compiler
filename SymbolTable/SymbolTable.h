@@ -45,6 +45,6 @@ public:
     void addChild(SymbolTable* child);
     bool contains(string entryName);
     SymbolEntry* getEntry(string entryName);
-    void printTable() const;
-    ~SymbolTable();
+    virtual void printTable() const;
+    virtual ~SymbolTable();
 };
