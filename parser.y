@@ -74,7 +74,7 @@ S : Code                 {}
 Code : line { 
             quad.printQuadraples();
             }
-     | Code line {}
+     | Code line {quad.printQuadraples();}
      ;
 
 
