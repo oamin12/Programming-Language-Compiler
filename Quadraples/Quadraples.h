@@ -39,9 +39,10 @@ private:
     int entryCount = 0;
     int labelCount = 0;
     int lineCount = 0;
+    int loopCount = 0;
     stack<string> labels;
     stack<string> lines; // for branching statements line1: line2: etc
-    
+    stack<string> loops; // for loops
 
     
     void incrementCount();
@@ -57,11 +58,16 @@ public:
     void branchingOperation(char* jumpType);
     void addLine();
     void addLineStart();
+
+    void startLoop();
+    void endLoop();
+    
     void incrementLineCount();
     void jumpOperation();
     void clearVariablesStack();
     char* getCurrentLabel();
     char* getCurrentLine();
+    char* getCurrentLoop();
     int  getLineCountinStack();
     void printQuadraples() const;
     void resetCount();
