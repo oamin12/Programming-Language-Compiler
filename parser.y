@@ -469,20 +469,12 @@ ifStatement : ifScope { quad.addLine2();}
             | ifScope elseScope 
             ;
 
-ifScope : IF OPENPARENTIF boolExpression CLOSEPARENTIF blockScope  { MotherSymbolTree.endCurrentScope("if"); 
+ifScope : IF '(' boolExpression ')' blockScope  { MotherSymbolTree.endCurrentScope("if"); 
                                                   printf("If Scope End\n"); 
                                                   MotherSymbolTree.currentTable->printTable();
-                                                  
-
                                                 }
         ;
 
-OPENPARENTIF : '(' {}
-            ;
-
-CLOSEPARENTIF : ')' {
-                    }
-                  ;
 
 elseScope : ElseLabel blockScope { MotherSymbolTree.endCurrentScope("else"); 
                               printf("Else Scope End\n"); 
@@ -492,7 +484,7 @@ elseScope : ElseLabel blockScope { MotherSymbolTree.endCurrentScope("else");
 
           | ElseLabel ifStatement { }
           ;
-ElseLabel : ELSE { 
+ElseLabel : ELSE  { 
                     quad.jumpOperation();
                     quad.addLine2();
                   }
