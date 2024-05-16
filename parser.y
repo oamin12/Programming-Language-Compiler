@@ -558,7 +558,7 @@ caseIdentifierChar : CHAR_IDENTIFIER {$$ = $1;}
 
 /* ########################## LOOPS  ##########################*/
 /* ########################## FOR LOOP  ##########################*/
-forLoop : FOR bracketBegin forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' blockScope  {  
+forLoop : FORLabel bracketBegin forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' blockScope  {  
                                                                                                         MotherSymbolTree.endCurrentScope("for"); 
                                                                                                         printf("Scope End\n"); 
                                                                                                         MotherSymbolTree.currentTable->printTable();
@@ -567,6 +567,11 @@ forLoop : FOR bracketBegin forLoopExpression  ';' forLoopCondition ';' forLoopIn
                                                                                                         printf("Scope End\n"); 
                                                                                                         MotherSymbolTree.currentTable->printTable();
                                                                                                       }
+        ;
+        
+FORLabel : FOR { 
+                  quad.startLoop();
+                }
         ;
 
 bracketBegin : '(' { MotherSymbolTree.addSymbolTableAndBeginScope(); 
@@ -697,7 +702,7 @@ whileLoop : whileLabel '(' boolExpression ')' blockScope {
                                                       MotherSymbolTree.currentTable->printTable();
                                                       char* label = quad.getCurrentLine();
                                                       quad.insertEntry("JMP", label, "", "");
-                                                      quad.addLine2();
+                                                      quad.endLoop();
                                                     }
           ;
 whileLabel : WHILE { 
@@ -705,10 +710,11 @@ whileLabel : WHILE {
                   }
           ;
 
-doWhileLoop : DO blockScope WHILE '(' boolExpression ')' endDoWhile {
+doWhileLoop : DOLabel blockScope WHILE '(' boolExpression ')' {
                                                       MotherSymbolTree.endCurrentScope("do_while"); 
                                                       printf("Scope End\n"); 
                                                       MotherSymbolTree.currentTable->printTable();
+                                                      quad.endLoop();
                                                     }
             ;
 
@@ -717,10 +723,7 @@ DOLabel : DO {
               }
         ;
 
-endDoWhile : ';' { 
-                    quad.endLoop();
-                  }
-           ;
+           
 /* ########################## FUNCTIONS ##########################*/
 function : dataTypes ID '(' functionParameters ')' blockScope { }
          | dataTypes ID '(' functionParameters ')' ';' { }
