@@ -445,7 +445,7 @@ Line1:
 
 boolExpression : boolExpression AND boolExpression { $$ = ANDing($1, $3);}
                 | boolExpression OR boolExpression { $$ = ORing($1, $3);}
-                | NOT boolExpression { $$ = NOTing($1, $2);}
+                | NOT boolExpression { $$ = NOTing($2);}
                 | expression boolComparators expression { $$ = CompareValues($1, $3, $2);
                                                               quad.branchingOperation($2);}
                 | boolean { $$ = ConvertFromNumberToString($1);}
@@ -458,7 +458,7 @@ boolExpression : boolExpression AND boolExpression { $$ = ANDing($1, $3);}
                         else if(entry1->variableType != "int" && entry1->variableType != "float" && entry1->variableType != "bool")
                           printf("Variable %s is not a boolean\n", $1);
                         else
-                          $$ = entry1->value.c_str();     
+                          $$ = ConvertFromNumberToString(stoi(entry1->value));     
                       }
                 ;
 
@@ -479,9 +479,11 @@ ifStatement : ifScope
             | ifScope elseScope 
             ;
 
-ifScope : IF OPENPARENTIF boolExpression CLOSEPARENTIF blockScopeIf  { MotherSymbolTree.endCurrentScope("if"); 
+ifScope : IF OPENPARENTIF boolExpression CLOSEPARENTIF blockScope  { MotherSymbolTree.endCurrentScope("if"); 
                                                   printf("Scope End\n"); 
                                                   MotherSymbolTree.currentTable->printTable();
+                                                  quad.jumpOperation();
+                                                  quad.addLine();
 
                                                 }
         ;
@@ -493,7 +495,7 @@ CLOSEPARENTIF : ')' {
                     }
                   ;
 
-elseScope : ELSE blockScopeElse { MotherSymbolTree.endCurrentScope("else"); 
+elseScope : ELSE blockScope { MotherSymbolTree.endCurrentScope("else"); 
                               printf("Scope End\n"); 
                               MotherSymbolTree.currentTable->printTable();
                               quad.addLine();
@@ -584,7 +586,7 @@ forLoopIncDecExpression : ID '=' expression {$$ = $3;}
                               else if(entry->isInitialised == false)
                                 printf("Variable is not initialized\n");
                               else{
-                                  $$ = stoi(entry->value) - 1;
+                                  $$ = ConvertFromNumberToString(stoi(entry->value) + 1);
                                   entry->value = std::to_string(stoi(entry->value) + 1);
                                 }
                           }
@@ -601,7 +603,7 @@ forLoopIncDecExpression : ID '=' expression {$$ = $3;}
                               else if(entry->isInitialised == false)
                                 printf("Variable is not initialized\n");
                               else{
-                                  $$ = stoi(entry->value) - 1;
+                                  $$ = ConvertFromNumberToString(stoi(entry->value) - 1);
                                   entry->value = std::to_string(stoi(entry->value) - 1);
                                 }
                           }
@@ -618,7 +620,7 @@ forLoopIncDecExpression : ID '=' expression {$$ = $3;}
                               else if(entry->isInitialised == false)
                                 printf("Variable is not initialized\n");
                               else{
-                                  $$ = stoi(entry->value);
+                                  $$ = ConvertFromNumberToString(stoi(entry->value));
                                   entry->value = std::to_string(stoi(entry->value) + 1);
                                 }
                           }
@@ -635,7 +637,7 @@ forLoopIncDecExpression : ID '=' expression {$$ = $3;}
                               else if(entry->isInitialised == false)
                                 printf("Variable is not initialized\n");
                               else{
-                                  $$ = stoi(entry->value);
+                                  $$ = ConvertFromNumberToString(stoi(entry->value));
                                   entry->value = std::to_string(stoi(entry->value) - 1);
                                 }
                           }
@@ -754,38 +756,6 @@ beginScope : '{' {
 endScope : '}' {
                 }
          ;
-
-blockScopeIf : beginScopeIf Code endScopeIf {
-                                       
- }
-           | beginScopeIf endScopeIf { }
-           ;
-
-beginScopeIf : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();
-                   }
-           ;
-
-endScopeIf : '}' {
-                   quad.jumpOperation();
-                   quad.addLine();
-                 }
-         ;
-
-blockScopeElse : beginScopeElse Code endScopeElse {
-                                       
- }
-           | beginScopeElse endScopeElse { }
-           ;
-
-beginScopeElse : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();
-                     
-                     }
-           ;
-
-endScopeElse : '}' {
-                   }
-           ;
-
 
 /* ########################## RETURN ##########################*/
 returnStatement : RETURN expression { $$ = $2;}
