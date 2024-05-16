@@ -22,6 +22,11 @@ void Quadraples::insertVariable(string name)
     labels.push(name);
 }
 
+void Quadraples::popVariable()
+{
+    labels.pop();
+}
+
 void Quadraples::unaryOperation(char* operation, char* result)
 {
     string res(result);
@@ -142,6 +147,29 @@ void Quadraples::endLoop()
     this->insertEntry(entry);
     QuadrapleEntry* entry2 = new QuadrapleEntry(line + ":", "", "", "");
     this->insertEntry(entry2);
+}
+
+void Quadraples::endForLoop(char *line)
+{
+    string temp(line);
+    if(temp.find("INC ") != string::npos)
+    {
+        string substring = temp.substr(4);
+        QuadrapleEntry* entry = new QuadrapleEntry("INC", substring, "", "");
+        this->insertEntry(entry);
+    }
+    else if(temp.find("DEC ") != string::npos)
+    {
+        string substring = temp.substr(4);
+        QuadrapleEntry* entry = new QuadrapleEntry("DEC", substring, "", "");
+        this->insertEntry(entry);
+    }
+    else if(temp != "")
+    {
+        unaryOperation("MOV", line);
+    }
+
+    endLoop();
 }
 
 void Quadraples::incrementLineCount()
