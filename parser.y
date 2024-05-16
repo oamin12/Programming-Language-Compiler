@@ -75,8 +75,11 @@ S : Code                 {}
 
 Code : line { 
             quad.printQuadraples();
+              quad.printQuadraplesToFile("output.txt");
             }
-     | Code line {quad.printQuadraples();}
+     | Code line {quad.printQuadraples();
+                  quad.printQuadraplesToFile("output.txt");
+     }
      ;
 
 

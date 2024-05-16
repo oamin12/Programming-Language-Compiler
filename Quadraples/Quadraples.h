@@ -4,6 +4,7 @@
 #include <cstring>
 #include <list>
 #include <stack>
+#include <fstream>
 using namespace std;
 
 struct QuadrapleEntry
@@ -87,6 +88,7 @@ public:
     void insertCaseID(char* caseValue);
     void processCaseIds(char* switchValue);
 
+    void printQuadraplesToFile(char* filename) const;
     ~Quadraples();
 };
 
