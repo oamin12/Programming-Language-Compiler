@@ -16,9 +16,10 @@ public:
     SymbolTable* getScopeSymbolTable(string entryName);
     SymbolEntry* getEntryByName(string entryName);
     FunctionTable* getFunctionTable(string functionName);
-    void addFunctionTable(string functionName, string returnType, vector<string> parameters);
+    FunctionTable* addFunctionTable(string functionName, string returnType, string parameters);
     void addSymbolTableAndBeginScope();
     void endCurrentScope(string scopeType);
+    void addSymbolEntry(string variableName, string variableType, string value = "0x0000", bool isInitialised = false, bool isConstant = false);
     SymbolTable* contains(string scopeName);
     ~SymbolTree();
 };

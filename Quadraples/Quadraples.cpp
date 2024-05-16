@@ -151,6 +151,7 @@ void Quadraples::endLoop()
 
 void Quadraples::endForLoop(char *line)
 {
+    
     string temp(line);
     if(temp.find("INC ") != string::npos)
     {
@@ -167,8 +168,9 @@ void Quadraples::endForLoop(char *line)
     else if(temp != "")
     {
         unaryOperation("MOV", line);
+        
     }
-
+    
     endLoop();
 }
 
