@@ -113,6 +113,27 @@ void Quadraples::addLineStart()
     lines.push(line);
 }
 
+void Quadraples::startLoop()
+{
+    string loop = getCurrentLoop();
+    this->loopCount++;
+    QuadrapleEntry* entry = new QuadrapleEntry(loop + ":", "", "", "");
+    this->insertEntry(entry);
+    loops.push(loop);
+}
+
+void Quadraples::endLoop()
+{
+    string loop = loops.top();
+    string line = lines.top();
+    loops.pop();
+    lines.pop();
+    QuadrapleEntry* entry = new QuadrapleEntry("JMP", "", "", loop);
+    this->insertEntry(entry);
+    QuadrapleEntry* entry2 = new QuadrapleEntry(line + ":", "", "", "");
+    this->insertEntry(entry2);
+}
+
 void Quadraples::incrementLineCount()
 {
     this->lineCount++;
@@ -147,6 +168,14 @@ char* Quadraples::getCurrentLine()
     char* linePtr = new char[line.length() + 1]; // +1 for null terminator
     strcpy(linePtr, line.c_str());
     return linePtr;
+}
+
+char *Quadraples::getCurrentLoop()
+{
+    std::string loop = "Loop" + std::to_string(this->loopCount);
+    char* loopPtr = new char[loop.length() + 1]; // +1 for null terminator
+    strcpy(loopPtr, loop.c_str());
+    return loopPtr;
 }
 
 void Quadraples::clearVariablesStack()
