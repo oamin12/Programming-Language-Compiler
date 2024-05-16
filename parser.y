@@ -95,8 +95,9 @@ line : dataTypes ID '=' expression';'         {
                                                     //add to quadruple
                                                     printf("Inserting variable: %s\n", $2);
                                                     quad.unaryOperation("MOV", $2);
+                                                    quad.popVariable();
                                                     quad.resetCount();
-                                                    quad.clearVariablesStack();
+                                                    //quad.clearVariablesStack();
                                                     
 
                                                     // Add the entry to the symbol table
@@ -121,8 +122,8 @@ line : dataTypes ID '=' expression';'         {
                                                   SymbolEntry* entry = new SymbolEntry($3, $2, $5, true, true);
                                                   //add to quadruple
                                                   quad.unaryOperation("MOV", $2);
+                                                  quad.popVariable();
                                                   quad.resetCount();
-                                                  quad.clearVariablesStack();
                                                   // Add the entry to the symbol table
                                                   MotherSymbolTree.currentTable->insert(entry); 
                                                   printf("Variable added to the symbol table\n");
@@ -142,9 +143,8 @@ line : dataTypes ID '=' expression';'         {
                                     printf("Error! Variable is constant\n");
                                   }else{
                                     quad.unaryOperation("MOV", $1);
-                                    quad.printQuadraples();
+                                    quad.popVariable();
                                     quad.resetCount();
-                                    quad.clearVariablesStack();
                                     printf("Variable is not constant\n");
                                     entry->value = $3;
                                     entry->isInitialised = true;
@@ -558,7 +558,7 @@ caseIdentifierChar : CHAR_IDENTIFIER {$$ = $1;}
 
 /* ########################## LOOPS  ##########################*/
 /* ########################## FOR LOOP  ##########################*/
-forLoop : FORLabel bracketBegin forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' blockScope  {  
+forLoop : FOR bracketBegin forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' blockScope  {  
                                                                                                         MotherSymbolTree.endCurrentScope("for"); 
                                                                                                         printf("Scope End\n"); 
                                                                                                         MotherSymbolTree.currentTable->printTable();
@@ -566,13 +566,11 @@ forLoop : FORLabel bracketBegin forLoopExpression  ';' forLoopCondition ';' forL
                                                                                                         MotherSymbolTree.endCurrentScope("for_initialization"); 
                                                                                                         printf("Scope End\n"); 
                                                                                                         MotherSymbolTree.currentTable->printTable();
+
+                                                                                                        quad.endForLoop($7);
                                                                                                       }
         ;
-        
-FORLabel : FOR { 
-                  quad.startLoop();
-                }
-        ;
+      
 
 bracketBegin : '(' { MotherSymbolTree.addSymbolTableAndBeginScope(); 
                     printf("Scope Begin\n"); 
@@ -582,7 +580,7 @@ forLoopCondition : boolExpression {}
                  | epsilon {}
                  ;
 
-forLoopIncDecExpression : ID '=' expression {$$ = $3;}
+forLoopIncDecExpression : ID '=' expression {$$ = $1; printf("hereee %s\n", $1); }
                         | INCREMENT ID  {
                           {
                               SymbolEntry* entry = MotherSymbolTree.getEntryByName($2);
@@ -595,8 +593,12 @@ forLoopIncDecExpression : ID '=' expression {$$ = $3;}
                               else if(entry->isInitialised == false)
                                 printf("Variable is not initialized\n");
                               else{
-                                  $$ = ConvertFromNumberToString(stoi(entry->value) + 1);
+                                  ConvertFromNumberToString(stoi(entry->value) + 1);
                                   entry->value = std::to_string(stoi(entry->value) + 1);
+                                  char* result = new char[4 + strlen($2) + 1];
+                                  strcpy(result, "INC ");
+                                  strcat(result, $2);
+                                  $$ = result;
                                 }
                           }
                         }
@@ -612,8 +614,12 @@ forLoopIncDecExpression : ID '=' expression {$$ = $3;}
                               else if(entry->isInitialised == false)
                                 printf("Variable is not initialized\n");
                               else{
-                                  $$ = ConvertFromNumberToString(stoi(entry->value) - 1);
+                                  ConvertFromNumberToString(stoi(entry->value) - 1);
                                   entry->value = std::to_string(stoi(entry->value) - 1);
+                                  char* result = new char[4 + strlen($2) + 1];
+                                  strcpy(result, "DEC ");
+                                  strcat(result, $2);
+                                  $$ = result;
                                 }
                           }
                         }
@@ -629,8 +635,12 @@ forLoopIncDecExpression : ID '=' expression {$$ = $3;}
                               else if(entry->isInitialised == false)
                                 printf("Variable is not initialized\n");
                               else{
-                                  $$ = ConvertFromNumberToString(stoi(entry->value));
+                                  ConvertFromNumberToString(stoi(entry->value));
                                   entry->value = std::to_string(stoi(entry->value) + 1);
+                                  char* result = new char[4 + strlen($2) + 1];
+                                  strcpy(result, "INC ");
+                                  strcat(result, $1);
+                                  $$ = result;
                                 }
                           }
                         }
@@ -646,12 +656,16 @@ forLoopIncDecExpression : ID '=' expression {$$ = $3;}
                               else if(entry->isInitialised == false)
                                 printf("Variable is not initialized\n");
                               else{
-                                  $$ = ConvertFromNumberToString(stoi(entry->value));
+                                  ConvertFromNumberToString(stoi(entry->value));
                                   entry->value = std::to_string(stoi(entry->value) - 1);
+                                  char* result = new char[4 + strlen($2) + 1];
+                                  strcpy(result, "DEC ");
+                                  strcat(result, $1);
+                                  $$ = result;
                                 }
                           }
                         }
-                        | epsilon {}
+                        | epsilon {$$="";}
                         ;
 
 forLoopExpression : dataTypes ID '=' expression {
@@ -670,6 +684,12 @@ forLoopExpression : dataTypes ID '=' expression {
                                                     MotherSymbolTree.currentTable->insert(entry); 
                                                     printf("Variable added to the symbol table\n");
                                                     MotherSymbolTree.currentTable->printTable();
+
+                                                    quad.unaryOperation("MOV", $2);
+                                                    quad.resetCount();
+                                                    quad.clearVariablesStack();
+
+                                                    quad.startLoop();
                                                   }
                                                   else
                                                     printf("Type Mismatch type1 = %s, type2 = %s\n", $1, expressionType);
@@ -689,10 +709,18 @@ forLoopExpression : dataTypes ID '=' expression {
                                     entry->isInitialised = true;
                                     printf("Variable intialized to the symbol table\n");
                                     MotherSymbolTree.currentTable->printTable();
+
+                                    quad.unaryOperation("MOV", $1);
+                                    quad.resetCount();
+                                    quad.clearVariablesStack();
+
+                                    quad.startLoop();
                                   }
                                 }
                           }
-                  | epsilon {}
+                  | epsilon {
+                              quad.startLoop();
+                  }
                   ;
 
 /* ########################## WHILE LOOP  ##########################*/

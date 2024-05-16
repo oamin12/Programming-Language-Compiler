@@ -54,6 +54,7 @@ public:
     void insertEntry(QuadrapleEntry* entry);
     void insertEntry(string operation, string arg1, string arg2, string result);
     void insertVariable(string name);
+    void popVariable();
     void unaryOperation(char* operation, char* result);
     void binaryOperation(char* operation, char* result);
     void branchingOperation(char* jumpType);
@@ -64,6 +65,7 @@ public:
 
     void startLoop();
     void endLoop();
+    void endForLoop(char* line);
     
     void incrementLineCount();
     void jumpOperation();
