@@ -74,7 +74,7 @@
 
 [a-zA-Z][a-zA-Z0-9_]* {yylval.idValue = strdup(yytext); return IDENTIFIER;}
 ((0)|([1-9][0-9]*)) {yylval.intValue = atoi(yytext); return INTGER_NUMBER;}
-[0-9]*\.[0-9]+ | [0-9]+\.[0-9]* {yylval.floatValue = atof(yytext); return FLOAT_NUMBER;}
+[0-9]+\.[0-9]+ {yylval.floatValue = atof(yytext); return FLOAT_NUMBER;}
 \"[^\"]*\" {yylval.stringValue = strdup(yytext); return STRING_IDENTIFIER;}
 \'[^\'\"]\' {yylval.chrValue = yytext[1]; return CHAR_IDENTIFIER;}
 . {return yytext[0];}

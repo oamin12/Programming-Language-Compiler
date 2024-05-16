@@ -6,12 +6,12 @@
     #include "SymbolTree/SymbolTree.h"
     #include "SemanticChecks/SemanticChecker.h"
     #include "utils.cpp"
-    #include "Quadruple/Quadruple.h"
+    #include "Quadraples/Quadraples.h"
     
     void yyerror(char* s);
     int yylex();
 
-    Quadruple quad;
+    Quadraples quad;
 
     SymbolTree MotherSymbolTree;
     SemanticChecker sc;
@@ -48,17 +48,20 @@
 
 %token <idValue> IDENTIFIER
 
-%type <stringValue> dataTypes boolComparators STRING_LITERALS mathExpression boolExpression expression functionCall
+%type <stringValue> dataTypes boolComparators STRING_LITERALS mathExpression boolExpression expression functionCall beginScope blockScope
 %type <boolValue> boolean
 %type <idValue> ID
 %type <intValue> INT_LITERAL caseIdentifierInt
 %type <floatValue> FLOAT_LITERAL math1 math2 math3
-%type <chrValue> CHAR_LITERAL caseIdentifierChar
+%type <chrValue> CHAR_LITERAL caseIdentifierChar 
 
 /* End of Part1 */ 
 %right '='
+%right ELSE
 %left '+' '-'
 %left '*' '/' '%'
+
+
 
 
 /*Part2 - Production Rules*/
@@ -68,7 +71,9 @@ S : Code                 {}
   ;
 
 
-Code : line {}
+Code : line { 
+            quad.printQuadraples();
+            }
      | Code line {}
      ;
 
@@ -88,12 +93,16 @@ line : dataTypes ID '=' expression';'         {
                                                     // $2 is the ID and $1 is the data type
                                                     SymbolEntry* entry = new SymbolEntry($2, $1, $4, true);
                                                     //add to quadruple
-                                                    quad.addQuad("=", $4, "", $2);
-                                              
+                                                    printf("Inserting variable: %s\n", $2);
+                                                    quad.unaryOperation("MOV", $2);
+                                                    quad.resetCount();
+                                                    quad.clearVariablesStack();
+                                                    
+
                                                     // Add the entry to the symbol table
                                                     MotherSymbolTree.currentTable->insert(entry); 
                                                     printf("Variable added to the symbol table\n");
-                                                    MotherSymbolTree.currentTable->printTable();
+                                                    // MotherSymbolTree.currentTable->printTable();
                                                   }
                                                   else
                                                     printf("Type Mismatch type1 = %s, type2 = %s\n", $1, expressionType);
@@ -110,6 +119,10 @@ line : dataTypes ID '=' expression';'         {
                                                 }else{
                                                   // $3 is the ID and $2 is the data type
                                                   SymbolEntry* entry = new SymbolEntry($3, $2, $5, true, true);
+                                                  //add to quadruple
+                                                  quad.unaryOperation("MOV", $2);
+                                                  quad.resetCount();
+                                                  quad.clearVariablesStack();
                                                   // Add the entry to the symbol table
                                                   MotherSymbolTree.currentTable->insert(entry); 
                                                   printf("Variable added to the symbol table\n");
@@ -123,9 +136,15 @@ line : dataTypes ID '=' expression';'         {
                                   printf("Variable is not declared\n");
                                 }else{
                                   SymbolEntry* entry = table->getEntry($1);
+                                  //add to quadruple
+                                  
                                   if(entry->isConstant){
                                     printf("Variable is constant\n");
                                   }else{
+                                    quad.unaryOperation("MOV", $1);
+                                    quad.printQuadraples();
+                                    quad.resetCount();
+                                    quad.clearVariablesStack();
                                     printf("Variable is not constant\n");
                                   }
                                 }
@@ -166,7 +185,7 @@ dataTypes : INT { $$ = $1;}
           ;
 
 /* Expression */
-expression : mathExpression {$$ = $1;}
+expression : mathExpression {$$ = $1; }
             | boolExpression {}
             | functionCall {}
             | CHAR_LITERAL { $$ = ConvertFromCharToString($1);}
@@ -180,19 +199,43 @@ mathExpression : math1 { $$ = ConvertFromNumberToString($1);}
 /* math1 is + - */
 /* math2 is * / */
 /* math3 is ( ) -ID -NUMBER ++ID --ID */
-math1 : math1 '+' math2 {$$ = $1 + $3;}
-      | math1 '-' math2 {$$ = $1 - $3;}
+math1 : math1 '+' math2 {
+                          $$ = $1 + $3;
+                          char* label = quad.getCurrentLabel();
+                          quad.binaryOperation("ADD", label);
+                          printf("ADD Label: %s\n", label);
+                          }
+      | math1 '-' math2 {$$ = $1 - $3;
+                          char* label = quad.getCurrentLabel();
+                          quad.binaryOperation("SUB", label);
+                          printf("SUB Label: %s\n", label);
+                          }
       | math2 {$$ = $1;}
       ;
 
-math2 : math2 '*' math3 {$$ = $1 * $3;}
-      | math2 '/' math3 {$$ = $1 / $3;}
-      | math2 '%' math3 { $$ = (int)$1 % (int)$3;}
+math2 : math2 '*' math3 {
+                          $$ = $1 * $3;
+                          char* label = quad.getCurrentLabel();
+                          quad.binaryOperation("MUL", label);
+                          printf("MUL Label: %s\n", label);
+                          }
+      | math2 '/' math3 {$$ = $1 / $3;
+                          char* label = quad.getCurrentLabel();
+                          quad.binaryOperation("DIV", label);
+                          printf("DIV Label: %s\n", label);}
+      | math2 '%' math3 { $$ = (int)$1 % (int)$3;
+                          char* label = quad.getCurrentLabel();
+                          quad.binaryOperation("MOD", label);
+                          printf("MOD Label: %s\n", label);}
       | math3 {$$ = $1;}
       ;
 
 math3 : '(' math1 ')' {$$ = $2;}
-      | '-'math1 {$$ = -1 * $2;}
+      | '-'math1 {$$ = -1 * $2;
+                  char* label = quad.getCurrentLabel();
+                  quad.unaryOperation("NEG", label);
+                  printf("NEG Label: %s\n", label);
+                  }
       | INT_LITERAL {$$ = $1;}
       | FLOAT_LITERAL {$$ = $1;}
       | ID {
@@ -202,11 +245,20 @@ math3 : '(' math1 ')' {$$ = $2;}
               else if(entry1->variableType != "int" && entry1->variableType != "float")
                 printf("Variable %s is not a number\n", $1);
               else
-                $$ = stof(entry1->value);     
+              {
+                $$ = stof(entry1->value);
+                quad.insertVariable($1); 
+              }
+                   
       }
       ;
 
-INT_LITERAL : INTGER_NUMBER {$$ = $1; printf("Number is: %d\n", $1);}
+INT_LITERAL : INTGER_NUMBER {
+                              $$ = $1; printf("Number is: %d\n", $1);
+                              quad.insertVariable(std::to_string($1));
+                              printf("Inserted int variable: %d\n", $1);
+                              
+                            } 
             | INCREMENT ID  { 
                               SymbolEntry* entry = MotherSymbolTree.getEntryByName($2);
                               if(entry == NULL)
@@ -239,13 +291,25 @@ INT_LITERAL : INTGER_NUMBER {$$ = $1; printf("Number is: %d\n", $1);}
             }
             ;
 
-FLOAT_LITERAL : FLOAT_NUMBER {$$ = $1;}
+FLOAT_LITERAL : FLOAT_NUMBER {
+                              $$ = $1;
+                              quad.insertVariable(std::to_string($1));
+                              printf("Inserted float variable: %f\n", $1);
+                              }
               ;
 
-CHAR_LITERAL : CHAR_IDENTIFIER {$$ = $1;}
+CHAR_LITERAL : CHAR_IDENTIFIER {
+                                $$ = $1;
+                                quad.insertVariable(std::to_string($1));
+                                printf("Inserted char variable: %c\n", $1);
+                                }
              ;
 
-STRING_LITERALS : STRING_IDENTIFIER {$$ = $1;}
+STRING_LITERALS : STRING_IDENTIFIER {
+                                    $$ = $1;
+                                    quad.insertVariable($1);
+                                    printf("Inserted string variable: %s\n", $1);
+                                    }
                 | NULLL {$$ = $1;}
                 | ID {}
                 ;
@@ -264,10 +328,40 @@ ID_OR_NUMBER : INTGER_NUMBER {}
 
 /* ########################## BOOLEAN EXPRESSIONS  ##########################*/
 /* bool1 is > < >= <= */
+
+/*
+if (a > b) {
+  c = 1;
+} else {
+  c = 2;
+}
+
+then
+
+cmp a b
+jgt Line0
+c = 2
+jmp Line1
+Line0: 
+c = 1
+Line1:
+
+cmp a b
+jlt Line0
+c = 1
+jmp Line1
+Line0:
+c = 2
+Line1:
+
+*/
+
 boolExpression : boolExpression AND boolExpression {}
                 | boolExpression OR boolExpression {}
                 | NOT boolExpression {}
-                | expression boolComparators expression {}
+                | expression boolComparators expression {
+                                                          quad.branchingOperation($2);
+                                                        }
                 | boolean { $$ = ConvertFromNumberToString($1);}
                 ;
 
@@ -288,15 +382,24 @@ ifStatement : ifScope
             | ifScope elseScope 
             ;
 
-ifScope : IF '(' boolExpression ')' blockScope  { MotherSymbolTree.endCurrentScope("if"); 
+ifScope : IF OPENPARENTIF boolExpression CLOSEPARENTIF blockScopeIf  { MotherSymbolTree.endCurrentScope("if"); 
                                                   printf("Scope End\n"); 
                                                   MotherSymbolTree.currentTable->printTable();
+
                                                 }
         ;
 
-elseScope : ELSE blockScope { MotherSymbolTree.endCurrentScope("else"); 
+OPENPARENTIF : '(' {}
+            ;
+
+CLOSEPARENTIF : ')' {
+                    }
+                  ;
+
+elseScope : ELSE blockScopeElse { MotherSymbolTree.endCurrentScope("else"); 
                               printf("Scope End\n"); 
                               MotherSymbolTree.currentTable->printTable();
+                              quad.addLine();
                             }
 
           | ELSE ifStatement { }
@@ -348,10 +451,20 @@ forLoopExpression : expression {}
                   | epsilon {}
                   ;
 
-whileLoop : WHILE '(' boolExpression ')' blockScope { }
+whileLoop : whileLabel '(' boolExpression ')' blockScope { 
+                                                      char* label = quad.getCurrentLine();
+                                                      quad.insertEntry("JMP", label, "", "");
+                                                      quad.addLine();
+                                                    }
           ;
 
-doWhileLoop : DO blockScope WHILE '(' boolExpression ')' { }
+whileLabel : WHILE { 
+                    quad.addLineStart();
+                  }
+          ;
+
+doWhileLoop : DO blockScope WHILE '(' boolExpression ')' { 
+                                                          }
             ;
 
 
@@ -374,15 +487,56 @@ functionCallParameters : functionCallParameters ',' expression {}
                        ;
 
 /* ########################## BLOCK SCOPES ##########################*/
-blockScope : beginScope Code endScope { }
-           | beginScope endScope { }
+blockScope : beginScope Code endScope {
+                                        $$ = $1;
+                                      }
+           | beginScope endScope { 
+                                      $$ = $1;
+                                  }
            ;
 
-beginScope : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();}
+beginScope : '{' {  MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); 
+                    MotherSymbolTree.currentTable->printTable();
+                    $$ = quad.getCurrentLine();
+                    quad.addLineStart();
+                  }
            ;
 
-endScope : '}' {}
+endScope : '}' {
+                }
          ;
+
+blockScopeIf : beginScopeIf Code endScopeIf {
+                                       
+ }
+           | beginScopeIf endScopeIf { }
+           ;
+
+beginScopeIf : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();
+                   }
+           ;
+
+endScopeIf : '}' {
+                  quad.jumpOperation();
+                  quad.addLine();
+                 }
+         ;
+
+blockScopeElse : beginScopeElse Code endScopeElse {
+                                       
+ }
+           | beginScopeElse endScopeElse { }
+           ;
+
+beginScopeElse : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();
+                     
+                     }
+           ;
+
+endScopeElse : '}' {
+                   }
+           ;
+
 
 /* ########################## RETURN ##########################*/
 returnStatement : RETURN expression { }
