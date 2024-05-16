@@ -306,6 +306,32 @@ void Quadraples::printQuadraples() const
     }
 }
 
+void Quadraples::printQuadraplesToFile(char* filename) const
+{
+    std::string file_name(filename);
+    std::ofstream file(file_name);
+    if (!file.is_open()) {
+        // Handle error
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return;
+    }
+
+    for (const auto& quad : this->quadraples)
+    {
+        file << quad->label << " "
+             << quad->operation << " "
+             << quad->arg1 << " "
+             << quad->arg2 << " "
+             << quad->result << std::endl;
+
+        file.flush();
+
+    }
+    
+    file.close();
+}
+
+
 Quadraples::~Quadraples()
 {
     for (auto quad : this->quadraples)
@@ -313,4 +339,5 @@ Quadraples::~Quadraples()
         delete quad;
     }
 }
+
 

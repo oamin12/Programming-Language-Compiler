@@ -1,10 +1,11 @@
 #include "FunctionTable.h"
 
-FunctionTable::FunctionTable(string scopeName, SymbolTable* parent, vector<SymbolTable*> children, string functionName, string returnType, vector<string> parameters) : SymbolTable(scopeName, parent, children)
+FunctionTable::FunctionTable(string scopeName, SymbolTable* parent, vector<SymbolTable*> children, string functionName, string returnType, vector<string> parameterNames, vector<string> parameterTypes) : SymbolTable(scopeName, parent, children)
 {
     this->functionName = functionName;
     this->returnType = returnType;
-    this->parameters = parameters;
+    this->parameterNames = parameterNames;
+    this->parameterTypes = parameterTypes;
 }
 
 void FunctionTable::printTable() const
@@ -20,14 +21,15 @@ void FunctionTable::printTable() const
     cout << endl;
     cout << "Return Type: " << this->returnType << endl;
     cout << "Parameters: ";
-    for (auto param : this->parameters)
+    for (int i = 0; i < this->parameterNames.size(); i++)
     {
-        cout << param << " ";
+        cout << this->parameterTypes[i] << " " << this->parameterNames[i] << " ";
     }
     cout << endl;
+    cout << "Function Name: " << this->functionName << endl;
     cout << "Table: " << endl;
     for (auto entry : this->table)
     {
-        cout << entry.first << " : " << entry.second->variableType << " = " << entry.second->value << endl;
+        cout << entry.first << " " << entry.second->variableType << " " << entry.second->value << endl;
     }
 }

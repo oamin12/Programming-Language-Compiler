@@ -10,8 +10,8 @@ class FunctionTable : public SymbolTable
 public:
     string functionName;
     string returnType;
-    vector<string> parameters;
-    FunctionTable(string scopeName, SymbolTable* parent, vector<SymbolTable*> children, string functionName, string returnType, vector<string> parameters);
-    virtual void printTable() const;
-    ~FunctionTable();
+    vector<string> parameterNames;
+    vector<string> parameterTypes;
+    FunctionTable(string scopeName, SymbolTable* parent, vector<SymbolTable*> children, string functionName, string returnType, vector<string> parameterNames, vector<string> parameterTypes);
+    virtual void printTable() const;   
 };
