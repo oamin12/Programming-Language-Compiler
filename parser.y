@@ -7,6 +7,8 @@
     #include "SemanticChecks/SemanticChecker.h"
     #include "utils.cpp"
     #include "Quadraples/Quadraples.h"
+
+    extern FILE *yyin;
     
     void yyerror(char* s);
     int yylex();
@@ -842,7 +844,26 @@ void yyerror(char *msg){
   exit(1);
 }
 
-int main(){
+int main(int argc, char** argv){
+  if(argc != 2){
+    yyerror("Please enter filename only!");
+    return 1;
+  }
+
+  FILE *file = fopen(argv[1], "r");
+
+  if(file == NULL){
+    yyerror("File not found!\n");
+    return 1;
+  }
+  
+  yyin = file;
+
+  do{
+    yyparse();
+  }while(!feof(yyin));
+
+
   yyparse();
   return 0;
 }
