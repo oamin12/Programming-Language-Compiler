@@ -1,6 +1,4 @@
-#include <iostream>
-using namespace std;
-#include <string>
+#include "utils.h"
 
 // char* ConvertFromNumberToString(float number)
 // {
@@ -64,4 +62,28 @@ char* ORing(char* value1, char* value2)
 char* NOTing(char* value)
 {
     return ConvertFromNumberToString(!atoi(value));
+}
+
+std::vector<std::string> splitString(const std::string& str, char delimiter) {
+    std::vector<std::string> result;
+    std::stringstream ss(str);
+    std::string token;
+    
+    while (std::getline(ss, token, delimiter)) {
+        result.push_back(token);
+    }
+    
+    return result;
+}
+
+char* concatenateThreeStrings(char* str1, char* str2, char* str3)
+{
+    string result = string(str1) + "," + string(str2) + " " + string(str3);
+    return strdup(result.c_str());
+}
+
+char* concatenateTwoStrings(char* str1, char* str2)
+{
+    string result = string(str1) + " " + string(str2);
+    return strdup(result.c_str());
 }
