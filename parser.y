@@ -48,7 +48,7 @@
 
 %token <idValue> IDENTIFIER
 
-%type <stringValue> dataTypes boolComparators STRING_LITERALS mathExpression boolExpression expression functionCall returnStatement
+%type <stringValue> dataTypes boolComparators STRING_LITERALS mathExpression boolExpression expression functionCall returnStatement forLoopIncDecExpression
 %type <boolValue> boolean
 %type <idValue> ID
 %type <intValue> INT_LITERAL caseIdentifierInt
@@ -159,6 +159,70 @@ line : dataTypes ID '=' expression';'         {
       | blockScope {}
       | functionCall ';' {} 
       | returnStatement ';' {}
+      | INCREMENT ID ';' {
+                            SymbolEntry* entry = MotherSymbolTree.getEntryByName($2);
+                            if(entry == NULL)
+                              printf("Variable is not declared\n");
+                            else if (entry->variableType != "int") 
+                              printf("Variable is not of type int\n");
+                            else if (entry->isConstant == true)
+                              printf("Variable is constant\n");
+                            else if(entry->isInitialised == false)
+                              printf("Variable is not initialized\n");
+                            else{
+                                entry->value = std::to_string(stoi(entry->value) + 1);
+                                printf("Variable incremented\n");
+                                MotherSymbolTree.currentTable->printTable();
+                            }
+                          }
+      | DECREMENT ID ';' {
+                            SymbolEntry* entry = MotherSymbolTree.getEntryByName($2);
+                            if(entry == NULL)
+                              printf("Variable is not declared\n");
+                            else if (entry->variableType != "int") 
+                              printf("Variable is not of type int\n");
+                            else if (entry->isConstant == true)
+                              printf("Variable is constant\n");
+                            else if(entry->isInitialised == false)
+                              printf("Variable is not initialized\n");
+                            else{
+                                entry->value = std::to_string(stoi(entry->value) - 1);
+                                printf("Variable decremented\n");
+                                MotherSymbolTree.currentTable->printTable();
+                            }
+                          }
+      | ID INCREMENT ';' {
+                            SymbolEntry* entry = MotherSymbolTree.getEntryByName($1);
+                            if(entry == NULL)
+                              printf("Variable is not declared\n");
+                            else if (entry->variableType != "int") 
+                              printf("Variable is not of type int\n");
+                            else if (entry->isConstant == true)
+                              printf("Variable is constant\n");
+                            else if(entry->isInitialised == false)
+                              printf("Variable is not initialized\n");
+                            else{
+                                entry->value = std::to_string(stoi(entry->value) + 1);
+                                printf("Variable incremented\n");
+                                MotherSymbolTree.currentTable->printTable();
+                            }
+                          }
+      | ID DECREMENT ';' {
+                            SymbolEntry* entry = MotherSymbolTree.getEntryByName($1);
+                            if(entry == NULL)
+                              printf("Variable is not declared\n");
+                            else if (entry->variableType != "int") 
+                              printf("Variable is not of type int\n");
+                            else if (entry->isConstant == true)
+                              printf("Variable is constant\n");
+                            else if(entry->isInitialised == false)
+                              printf("Variable is not initialized\n");
+                            else{
+                                entry->value = std::to_string(stoi(entry->value) - 1);
+                                printf("Variable decremented\n");
+                                MotherSymbolTree.currentTable->printTable();
+                            }
+                          }
       ;
 
 dataTypes : INT { $$ = $1;}
@@ -240,6 +304,36 @@ INT_LITERAL : INTGER_NUMBER {$$ = $1; printf("Number is: %d\n", $1);}
                                   $$ = stoi(entry->value) - 1;
                                   entry->value = std::to_string(stoi(entry->value) - 1);
                                 }
+                            }
+            | ID INCREMENT {
+                              SymbolEntry* entry = MotherSymbolTree.getEntryByName($1);
+                              if(entry == NULL)
+                                printf("Variable is not declared\n");
+                              else if (entry->variableType != "int") 
+                                printf("Variable is not of type int\n");
+                              else if (entry->isConstant == true)
+                                printf("Variable is constant\n");
+                              else if(entry->isInitialised == false)
+                                printf("Variable is not initialized\n");
+                              else{
+                                  $$ = stoi(entry->value);
+                                  entry->value = std::to_string(stoi(entry->value) + 1);
+                                }
+            }
+            | ID DECREMENT {
+                              SymbolEntry* entry = MotherSymbolTree.getEntryByName($1);
+                              if(entry == NULL)
+                                printf("Variable is not declared\n");
+                              else if (entry->variableType != "int") 
+                                printf("Variable is not of type int\n");
+                              else if (entry->isConstant == true)
+                                printf("Variable is constant\n");
+                              else if(entry->isInitialised == false)
+                                printf("Variable is not initialized\n");
+                              else{
+                                  $$ = stoi(entry->value);
+                                  entry->value = std::to_string(stoi(entry->value) - 1);
+                                }
             }
             ;
 
@@ -260,7 +354,7 @@ STRING_LITERALS : STRING_IDENTIFIER {$$ = $1;}
 
 boolExpression : boolExpression AND boolExpression { $$ = ANDing($1, $3);}
                 | boolExpression OR boolExpression { $$ = ORing($1, $3);}
-                | NOT boolExpression { $$ = NOTing($1, $3);}
+                | NOT boolExpression { $$ = NOTing($1, $2);}
                 | expression boolComparators expression { $$ = CompareValues($1, $3, $2);}
                 | boolean { $$ = ConvertFromNumberToString($1);}
                 | ID {
@@ -272,7 +366,7 @@ boolExpression : boolExpression AND boolExpression { $$ = ANDing($1, $3);}
                         else if(entry1->variableType != "int" && entry1->variableType != "float" && entry1->variableType != "bool")
                           printf("Variable %s is not a boolean\n", $1);
                         else
-                          $$ = entry1->value;     
+                          $$ = entry1->value.c_str();     
                       }
                 ;
 
@@ -356,6 +450,7 @@ caseIdentifierChar : CHAR_IDENTIFIER {$$ = $1;}
 
 
 /* ########################## LOOPS  ##########################*/
+/* ########################## FOR LOOP  ##########################*/
 forLoop : FOR bracketBegin forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' blockScope  {  
                                                                                                         MotherSymbolTree.endCurrentScope("for"); 
                                                                                                         printf("Scope End\n"); 
@@ -375,20 +470,120 @@ forLoopCondition : boolExpression {}
                  | epsilon {}
                  ;
 
-forLoopIncDecExpression : ID '=' expression {}
-                        | INCREMENT ID  {}
-                        | DECREMENT ID  {}
-                        | ID INCREMENT {}
-                        | ID DECREMENT {}
+forLoopIncDecExpression : ID '=' expression {$$ = $3;}
+                        | INCREMENT ID  {
+                          {
+                              SymbolEntry* entry = MotherSymbolTree.getEntryByName($2);
+                              if(entry == NULL)
+                                printf("Variable is not declared\n");
+                              else if (entry->variableType != "int") 
+                                printf("Variable is not of type int\n");
+                              else if (entry->isConstant == true)
+                                printf("Variable is constant\n");
+                              else if(entry->isInitialised == false)
+                                printf("Variable is not initialized\n");
+                              else{
+                                  $$ = stoi(entry->value) - 1;
+                                  entry->value = std::to_string(stoi(entry->value) + 1);
+                                }
+                          }
+                        }
+                        | DECREMENT ID  {
+                          {
+                              SymbolEntry* entry = MotherSymbolTree.getEntryByName($2);
+                              if(entry == NULL)
+                                printf("Variable is not declared\n");
+                              else if (entry->variableType != "int") 
+                                printf("Variable is not of type int\n");
+                              else if (entry->isConstant == true)
+                                printf("Variable is constant\n");
+                              else if(entry->isInitialised == false)
+                                printf("Variable is not initialized\n");
+                              else{
+                                  $$ = stoi(entry->value) - 1;
+                                  entry->value = std::to_string(stoi(entry->value) - 1);
+                                }
+                          }
+                        }
+                        | ID INCREMENT {
+                          {
+                              SymbolEntry* entry = MotherSymbolTree.getEntryByName($1);
+                              if(entry == NULL)
+                                printf("Variable is not declared\n");
+                              else if (entry->variableType != "int") 
+                                printf("Variable is not of type int\n");
+                              else if (entry->isConstant == true)
+                                printf("Variable is constant\n");
+                              else if(entry->isInitialised == false)
+                                printf("Variable is not initialized\n");
+                              else{
+                                  $$ = stoi(entry->value);
+                                  entry->value = std::to_string(stoi(entry->value) + 1);
+                                }
+                          }
+                        }
+                        | ID DECREMENT {
+                          {
+                              SymbolEntry* entry = MotherSymbolTree.getEntryByName($1);
+                              if(entry == NULL)
+                                printf("Variable is not declared\n");
+                              else if (entry->variableType != "int") 
+                                printf("Variable is not of type int\n");
+                              else if (entry->isConstant == true)
+                                printf("Variable is constant\n");
+                              else if(entry->isInitialised == false)
+                                printf("Variable is not initialized\n");
+                              else{
+                                  $$ = stoi(entry->value);
+                                  entry->value = std::to_string(stoi(entry->value) - 1);
+                                }
+                          }
+                        }
                         | epsilon {}
                         ;
 
-forLoopExpression : expression {}
-                  | dataTypes ID '=' expression {}
-                  | ID '=' expression {}
+forLoopExpression : dataTypes ID '=' expression {
+                                                bool isContained = MotherSymbolTree.currentTable->contains($2);
+                                                if(isContained){
+                                                  printf("Variable already declared\n");
+                                                }else{
+                                                  char* expressionType = sc.determineType($4);
+
+                                                  if(sc.matchTypes($1, expressionType)){
+                                                    printf("Type Match type1 = %s, type2 = %s\n", $1, expressionType);
+                                                    // $2 is the ID and $1 is the data type
+                                                    SymbolEntry* entry = new SymbolEntry($2, $1, $4, true);
+                                              
+                                                    // Add the entry to the symbol table
+                                                    MotherSymbolTree.currentTable->insert(entry); 
+                                                    printf("Variable added to the symbol table\n");
+                                                    MotherSymbolTree.currentTable->printTable();
+                                                  }
+                                                  else
+                                                    printf("Type Mismatch type1 = %s, type2 = %s\n", $1, expressionType);
+                                                }
+                                              }
+                  | ID '=' expression {
+                            SymbolTable* table = MotherSymbolTree.getScopeSymbolTable($1);
+                                if(table == NULL){
+                                  printf("Variable is not declared\n");
+                                }else{
+                                  SymbolEntry* entry = table->getEntry($1);
+                                  if(entry->isConstant){
+                                    printf("Error! Variable is constant\n");
+                                  }else{
+                                    printf("Variable is not constant\n");
+                                    entry->value = $3;
+                                    entry->isInitialised = true;
+                                    printf("Variable intialized to the symbol table\n");
+                                    MotherSymbolTree.currentTable->printTable();
+                                  }
+                                }
+                          }
                   | epsilon {}
                   ;
 
+/* ########################## WHILE LOOP  ##########################*/
 whileLoop : WHILE '(' boolExpression ')' blockScope {
                                                       MotherSymbolTree.endCurrentScope("while"); 
                                                       printf("Scope End\n"); 
@@ -427,14 +622,18 @@ blockScope : beginScope Code endScope { }
            | beginScope endScope { }
            ;
 
-beginScope : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();}
+beginScope : '{' { 
+                    MotherSymbolTree.addSymbolTableAndBeginScope(); 
+                    printf("Scope Begin\n"); 
+                    MotherSymbolTree.currentTable->printTable();
+                  }
            ;
 
 endScope : '}' {}
          ;
 
 /* ########################## RETURN ##########################*/
-returnStatement : RETURN expression { $$= $2;}
+returnStatement : RETURN expression { $$ = $2;}
                 | RETURN { }
                 ;
 
