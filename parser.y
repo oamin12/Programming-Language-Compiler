@@ -258,7 +258,17 @@ boolExpression : boolExpression AND boolExpression { $$ = ANDing($1, $3);}
                 | NOT boolExpression { $$ = NOTing($1, $3);}
                 | expression boolComparators expression { $$ = CompareValues($1, $3, $2);}
                 | boolean { $$ = ConvertFromNumberToString($1);}
-                | ID
+                | ID {
+                        SymbolEntry* entry1 = MotherSymbolTree.getEntryByName($1);    
+                        if(!entry1)
+                          printf("Variable %s is not declared\n", $1);
+                        else if (entry1->isInitialised == false)
+                          printf("Variable %s is not initialized\n", $1);
+                        else if(entry1->variableType != "int" && entry1->variableType != "float" && entry1->variableType != "bool")
+                          printf("Variable %s is not a boolean\n", $1);
+                        else
+                          $$ = entry1->value;     
+                      }
                 ;
 
 boolean : TRUEE {$$ = $1;}
@@ -341,13 +351,21 @@ caseIdentifierChar : CHAR_IDENTIFIER {$$ = $1;}
 
 
 /* ########################## LOOPS  ##########################*/
-forLoop : FOR '(' forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' blockScope  {  
+forLoop : FOR bracketBegin forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' blockScope  {  
                                                                                                         MotherSymbolTree.endCurrentScope("for"); 
+                                                                                                        printf("Scope End\n"); 
+                                                                                                        MotherSymbolTree.currentTable->printTable();
+
+                                                                                                        MotherSymbolTree.endCurrentScope("for_initialization"); 
                                                                                                         printf("Scope End\n"); 
                                                                                                         MotherSymbolTree.currentTable->printTable();
                                                                                                       }
         ;
 
+bracketBegin : '(' { MotherSymbolTree.addSymbolTableAndBeginScope(); 
+                    printf("Scope Begin\n"); 
+                    MotherSymbolTree.currentTable->printTable();}
+             ;
 forLoopCondition : boolExpression {}
                  | epsilon {}
                  ;
@@ -374,7 +392,7 @@ whileLoop : WHILE '(' boolExpression ')' blockScope {
           ;
 
 doWhileLoop : DO blockScope WHILE '(' boolExpression ')' {
-                                                      MotherSymbolTree.endCurrentScope("dowhile"); 
+                                                      MotherSymbolTree.endCurrentScope("do_while"); 
                                                       printf("Scope End\n"); 
                                                       MotherSymbolTree.currentTable->printTable();
                                                     }
