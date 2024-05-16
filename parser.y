@@ -6,9 +6,12 @@
     #include "SymbolTree/SymbolTree.h"
     #include "SemanticChecks/SemanticChecker.h"
     #include "utils.cpp"
+    #include "Quadruple/Quadruple.h"
     
     void yyerror(char* s);
     int yylex();
+
+    Quadruple quad;
 
     SymbolTree MotherSymbolTree;
     SemanticChecker sc;
@@ -84,6 +87,8 @@ line : dataTypes ID '=' expression';'         {
                                                     printf("Type Match type1 = %s, type2 = %s\n", $1, expressionType);
                                                     // $2 is the ID and $1 is the data type
                                                     SymbolEntry* entry = new SymbolEntry($2, $1, $4, true);
+                                                    //add to quadruple
+                                                    quad.addQuad("=", $4, "", $2);
                                               
                                                     // Add the entry to the symbol table
                                                     MotherSymbolTree.currentTable->insert(entry); 
@@ -92,9 +97,9 @@ line : dataTypes ID '=' expression';'         {
                                                   }
                                                   else
                                                     printf("Type Mismatch type1 = %s, type2 = %s\n", $1, expressionType);
-                                                  
+                                                }                                      
+                                                
 
-                                                }
                                               }
       | CONST dataTypes ID '=' expression';' {
                                                 printf("Constant Declaration: Name: %s, Type: %s\n", $3, $2);
