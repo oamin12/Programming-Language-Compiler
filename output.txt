@@ -1,0 +1,19 @@
+ MOV 5  x
+ MOV 3  y
+ MOV 0  i
+ Loop0:   
+ CMP i 10 
+ JGE   Line0
+ MOV 5  y
+ Loop1:   
+ CMP y 3 
+ JGE   Line1
+ ADD y 3 T8
+ MOV 3  x
+ MOV T8  y
+ JMP   Loop1
+ Line1:   
+ INC i  
+ JMP   Loop0
+ Line0:   
+ MOV "hi"  z
