@@ -700,8 +700,6 @@ whileLoop : whileLabel '(' boolExpression ')' blockScope {
                                                       MotherSymbolTree.endCurrentScope("while"); 
                                                       printf("Scope End\n"); 
                                                       MotherSymbolTree.currentTable->printTable();
-                                                      char* label = quad.getCurrentLine();
-                                                      quad.insertEntry("JMP", label, "", "");
                                                       quad.endLoop();
                                                     }
           ;
