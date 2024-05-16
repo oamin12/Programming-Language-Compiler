@@ -172,7 +172,7 @@ line : dataTypes ID '=' expression';'         {
       | ifStatement {}
       | forLoop {}
       | whileLoop {}
-      | doWhileLoop {}
+      | doWhileLoop ';' {}
       | switchCase {}
       | function {}
       | blockScope {}
