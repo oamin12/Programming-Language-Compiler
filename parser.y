@@ -426,11 +426,17 @@ caseIdentifierChar : CHAR_IDENTIFIER {}
 
 
 /* ########################## LOOPS  ##########################*/
-forLoop : FOR '(' forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' blockScope  {  
+forLoop : FORLabel '(' forLoopExpression  ';' forLoopCondition ';' forLoopIncDecExpression ')' blockScope  {  
                                                                                                         MotherSymbolTree.endCurrentScope("for"); 
                                                                                                         printf("Scope End\n"); 
                                                                                                         MotherSymbolTree.currentTable->printTable();
+                                                                                                        quad.endLoop();
                                                                                                       }
+        ;
+
+FORLabel : FOR { 
+                  quad.startLoop();
+                }
         ;
 
 forLoopCondition : boolExpression {}
