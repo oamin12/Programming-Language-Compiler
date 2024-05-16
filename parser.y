@@ -461,7 +461,7 @@ whileLoop : whileLabel '(' boolExpression ')' blockScope {
           ;
 
 whileLabel : WHILE { 
-                    quad.addLineStart();
+                    quad.startLoop();
                   }
           ;
 
