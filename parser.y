@@ -451,10 +451,12 @@ forLoopExpression : expression {}
                   | epsilon {}
                   ;
 
-whileLoop : whileLabel '(' boolExpression ')' blockScope { 
-                                                      char* label = quad.getCurrentLine();
-                                                      quad.insertEntry("JMP", label, "", "");
-                                                      quad.addLine();
+/* ########################## WHILE LOOP  ##########################*/
+whileLoop : whileLabel '(' boolExpression ')' blockScope {
+                                                      MotherSymbolTree.endCurrentScope("while"); 
+                                                      printf("Scope End\n"); 
+                                                      MotherSymbolTree.currentTable->printTable();
+                                                      quad.endLoop();
                                                     }
           ;
 
@@ -463,11 +465,20 @@ whileLabel : WHILE {
                   }
           ;
 
-doWhileLoop : DO blockScope WHILE '(' boolExpression ')' { 
-                                                          }
+doWhileLoop : DOLabel blockScope WHILE '(' boolExpression ')' {
+                                                      MotherSymbolTree.endCurrentScope("do_while"); 
+                                                      printf("Scope End\n"); 
+                                                      MotherSymbolTree.currentTable->printTable();
+                                                      quad.endLoop();
+                                                    }
             ;
 
+DOLabel : DO { 
+                quad.startLoop();
+              }
+        ;
 
+           
 /* ########################## FUNCTIONS ##########################*/
 function : dataTypes ID '(' functionParameters ')' blockScope { }
          | dataTypes ID '(' functionParameters ')' ';' { }
