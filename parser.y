@@ -172,7 +172,7 @@ line : dataTypes ID '=' expression';'         {
       | ifStatement {}
       | forLoop {}
       | whileLoop {}
-      | doWhileLoop ';' {}
+      | doWhileLoop {}
       | switchCase {}
       | function {}
       | blockScope {}
@@ -695,18 +695,26 @@ whileLoop : whileLabel '(' boolExpression ')' blockScope {
                                                     }
           ;
 whileLabel : WHILE { 
-                    quad.addLineStart();
+                    quad.startLoop();
                   }
           ;
 
-doWhileLoop : DO blockScope WHILE '(' boolExpression ')' {
+doWhileLoop : DO blockScope WHILE '(' boolExpression ')' endDoWhile {
                                                       MotherSymbolTree.endCurrentScope("do_while"); 
                                                       printf("Scope End\n"); 
                                                       MotherSymbolTree.currentTable->printTable();
                                                     }
             ;
 
+DOLabel : DO { 
+                quad.startLoop();
+              }
+        ;
 
+endDoWhile : ';' { 
+                    quad.endLoop();
+                  }
+           ;
 /* ########################## FUNCTIONS ##########################*/
 function : dataTypes ID '(' functionParameters ')' blockScope { }
          | dataTypes ID '(' functionParameters ')' ';' { }
@@ -739,8 +747,7 @@ beginScope : '{' {
                     printf("Scope Begin\n"); 
                     MotherSymbolTree.currentTable->printTable();
                     $$ = quad.getCurrentLine();
-                    quad.addLineStart();
-
+                    // quad.addLineStart();
                   }
            ;
 
@@ -759,8 +766,8 @@ beginScopeIf : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Sco
            ;
 
 endScopeIf : '}' {
-                  quad.jumpOperation();
-                  quad.addLine();
+                   quad.jumpOperation();
+                   quad.addLine();
                  }
          ;
 
