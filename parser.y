@@ -479,9 +479,11 @@ ifStatement : ifScope
             | ifScope elseScope 
             ;
 
-ifScope : IF OPENPARENTIF boolExpression CLOSEPARENTIF blockScopeIf  { MotherSymbolTree.endCurrentScope("if"); 
+ifScope : IF OPENPARENTIF boolExpression CLOSEPARENTIF blockScope  { MotherSymbolTree.endCurrentScope("if"); 
                                                   printf("Scope End\n"); 
                                                   MotherSymbolTree.currentTable->printTable();
+                                                  quad.jumpOperation();
+                                                  quad.addLine();
 
                                                 }
         ;
@@ -493,7 +495,7 @@ CLOSEPARENTIF : ')' {
                     }
                   ;
 
-elseScope : ELSE blockScopeElse { MotherSymbolTree.endCurrentScope("else"); 
+elseScope : ELSE blockScope { MotherSymbolTree.endCurrentScope("else"); 
                               printf("Scope End\n"); 
                               MotherSymbolTree.currentTable->printTable();
                               quad.addLine();
@@ -747,38 +749,6 @@ beginScope : '{' {
 endScope : '}' {
                 }
          ;
-
-blockScopeIf : beginScopeIf Code endScopeIf {
-                                       
- }
-           | beginScopeIf endScopeIf { }
-           ;
-
-beginScopeIf : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();
-                   }
-           ;
-
-endScopeIf : '}' {
-                  quad.jumpOperation();
-                  quad.addLine();
-                 }
-         ;
-
-blockScopeElse : beginScopeElse Code endScopeElse {
-                                       
- }
-           | beginScopeElse endScopeElse { }
-           ;
-
-beginScopeElse : '{' { MotherSymbolTree.addSymbolTableAndBeginScope(); printf("Scope Begin\n"); MotherSymbolTree.currentTable->printTable();
-                     
-                     }
-           ;
-
-endScopeElse : '}' {
-                   }
-           ;
-
 
 /* ########################## RETURN ##########################*/
 returnStatement : RETURN expression { $$ = $2;}
