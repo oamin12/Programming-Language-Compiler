@@ -119,7 +119,7 @@ line : dataTypes ID '=' expression';'         {
                                 }else{
                                   SymbolEntry* entry = table->getEntry($1);
                                   if(entry->isConstant){
-                                    printf("Variable is constant\n");
+                                    printf("Error! Variable is constant\n");
                                   }else{
                                     printf("Variable is not constant\n");
                                     entry->value = $3;
@@ -166,7 +166,7 @@ dataTypes : INT { $$ = $1;}
 
 /* Expression */
 expression : mathExpression {$$ = $1;}
-            | boolExpression {}
+            | boolExpression {$$ = $1;}
             | functionCall {}
             | CHAR_LITERAL { $$ = ConvertFromCharToString($1);}
             | STRING_LITERALS {$$ = $1;}
@@ -249,25 +249,16 @@ STRING_LITERALS : STRING_IDENTIFIER {$$ = $1;}
                 | ID {}
                 ;
 
-/* 
-ID_OR_NUMBER : INTGER_NUMBER {}
-              | FLOAT_NUMBER {}
-              | CHAR_IDENTIFIER {}
-              | STRING_IDENTIFIER {}
-              | NULLL {}
-              | INCREMENT ID {}
-              | DECREMENT ID {}
-              | ID {}
-              ; */
-
 
 /* ########################## BOOLEAN EXPRESSIONS  ##########################*/
 /* bool1 is > < >= <= */
-boolExpression : boolExpression AND boolExpression {}
-                | boolExpression OR boolExpression {}
-                | NOT boolExpression {}
-                | expression boolComparators expression {}
+
+boolExpression : boolExpression AND boolExpression { $$ = ANDing($1, $3);}
+                | boolExpression OR boolExpression { $$ = ORing($1, $3);}
+                | NOT boolExpression { $$ = NOTing($1, $3);}
+                | expression boolComparators expression { $$ = CompareValues($1, $3, $2);}
                 | boolean { $$ = ConvertFromNumberToString($1);}
+                | ID
                 ;
 
 boolean : TRUEE {$$ = $1;}
@@ -302,22 +293,50 @@ elseScope : ELSE blockScope { MotherSymbolTree.endCurrentScope("else");
           ;
 
 /* ########################## SWITCH CASE ########################## */ 
-switchCase : SWITCH '(' ID ')' beginScope caseStatements endScope { }
+switchCase : SWITCH '(' ID ')' beginScope caseStatements endScope { 
+                                                                    SymbolEntry* entry = MotherSymbolTree.getEntryByName($3);
+                                                                    if(entry == NULL)
+                                                                      printf("Variable is not declared\n");
+                                                                    else if(entry->variableType != "int" && entry->variableType != "char")
+                                                                      printf("Variable is not of type int or char\n");
+                                                                    else
+                                                                    {
+                                                                    MotherSymbolTree.endCurrentScope("switch"); 
+                                                                    printf("Scope End\n"); 
+                                                                    MotherSymbolTree.currentTable->printTable();}
+                                                                  }
            ;
 
 caseStatements : caseStatements caseStatement {}
                | caseStatement {}
                ;
 
-caseStatement : CASE caseIdentifierInt ':' Code {}
-              | CASE caseIdentifierChar ':' Code {}
-              | DEFAULT ':' Code {}
+caseStatement : CASE caseIdentifierInt beginCase Code {
+                                                MotherSymbolTree.endCurrentScope("case"); 
+                                                printf("Scope End\n"); 
+                                                MotherSymbolTree.currentTable->printTable();
+                                                }
+              | CASE caseIdentifierChar beginCase Code { 
+                                                MotherSymbolTree.endCurrentScope("case"); 
+                                                printf("Scope End\n"); 
+                                                MotherSymbolTree.currentTable->printTable();
+                                                }
+              | DEFAULT beginCase Code {
+                                  MotherSymbolTree.endCurrentScope("case"); 
+                                  printf("Scope End\n"); 
+                                  MotherSymbolTree.currentTable->printTable();
+                                  }
               ;
 
-caseIdentifierInt : INTGER_NUMBER {}
+beginCase : ':' { MotherSymbolTree.addSymbolTableAndBeginScope(); 
+                  printf("Scope Begin\n"); 
+                  MotherSymbolTree.currentTable->printTable();}
+          ;
+
+caseIdentifierInt : INTGER_NUMBER {$$ = $1;}
                   ;
 
-caseIdentifierChar : CHAR_IDENTIFIER {}
+caseIdentifierChar : CHAR_IDENTIFIER {$$ = $1;}
                    ;
 
 
@@ -392,8 +411,7 @@ endScope : '}' {}
          ;
 
 /* ########################## RETURN ##########################*/
-returnStatement : RETURN expression { $$= $2;
-}
+returnStatement : RETURN expression { $$= $2;}
                 | RETURN { }
                 ;
 
