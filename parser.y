@@ -7,6 +7,8 @@
     #include "SemanticChecks/SemanticChecker.h"
     #include "utils.h"
     #include "Quadraples/Quadraples.h"
+
+    extern FILE *yyin;
     
     void yyerror(char* s);
     int yylex();
@@ -474,16 +476,33 @@ boolComparators : GREATERTHANEQUAL {$$ = $1;}
                 ;
 
 /* ########################## IF-ELSE EXPRESSIONS  ##########################*/
-ifStatement : ifScope { quad.addLine2();}
-            | ifScope elseScope 
+ifStatement : ifScope { printf("If Scope EndEHHHHHHHHHHH\n");
+                        quad.currentListIndex -= 1;
+                        printf("If Scope EndAAAA\n");
+                        if(quad.currentListIndex != -1)
+                        {                         
+                           quad.addLine2();
+                        }
+                      }
+            | ifScope elseScope { printf("If Scope End\n");
+                                  quad.currentListIndex -= 1;
+                                  printf("If Scope End\n");
+                                  if(quad.currentListIndex != -1){
+                                    quad.addLine2();}
+
+                                  }
             ;
 
-ifScope : IF '(' boolExpression ')' blockScope  { MotherSymbolTree.endCurrentScope("if"); 
+ifScope : IfLabel '(' boolExpression ')' blockScope  { MotherSymbolTree.endCurrentScope("if"); 
                                                   printf("If Scope End\n"); 
                                                   MotherSymbolTree.currentTable->printTable();
                                                 }
         ;
 
+IfLabel : IF { 
+                quad.currentListIndex += 1;
+             }
+        ;
 
 elseScope : ElseLabel blockScope { MotherSymbolTree.endCurrentScope("else"); 
                               printf("Else Scope End\n"); 
@@ -841,15 +860,28 @@ void yyerror(char *msg){
   fprintf(yyout, "line [%d]: %s\n", yylineno, msg);
 }
 
-int main(){
-  // Open a file to read the input from
-  yyin = fopen("input.txt", "r");
-  if(yyin == NULL){
-    printf("Error opening file\n");
-    return 0;
+int main(int argc, char** argv){
+  if(argc != 2){
+    yyerror("Please enter filename only!");
+    return 1;
   }
+
+  FILE *file = fopen(argv[1], "r");
+
+  if(file == NULL){
+    yyerror("File not found!\n");
+    return 1;
+  }
+  
+  yyin = file;
+
+  do{
+    yyparse();
+  }while(!feof(yyin));
+
+
   yyout = fopen("errors.txt", "w");
-  yyparse();
+  /* yyparse(); */
   fclose(yyin);
   fclose(yyout);
   MotherSymbolTree.printAllTables();

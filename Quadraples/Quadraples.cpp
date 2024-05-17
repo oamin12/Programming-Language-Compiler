@@ -2,7 +2,7 @@
 
 Quadraples::Quadraples()
 {
-
+    this->lines_list_vec.resize(100);
 }
 
 void Quadraples::insertEntry(QuadrapleEntry* entry)
@@ -61,7 +61,10 @@ void Quadraples::branchingOperation(char* jumpType)
     string line = getCurrentLine();
     this->lineCount++;
     lines.push(line);
-    lines_list.push_front(line);
+
+    //lines_list.push_front(line);
+    if(currentListIndex != -1 )
+        lines_list_vec[currentListIndex].push_front(line);
     string arg2 = labels.top();
     labels.pop();
     string arg1 = labels.top();
@@ -113,8 +116,14 @@ void Quadraples::addLine()
 
 void Quadraples::addLine2()
 {
-    string line = lines_list.back() + ":";
-    lines_list.pop_back();
+    //string line = lines_list.back() + ":";
+    if (lines_list_vec[currentListIndex].empty())
+    {
+        return;
+    }
+    string line = lines_list_vec[currentListIndex].back() + ":";
+    //lines_list.pop_back();
+    lines_list_vec[currentListIndex].pop_back();
     QuadrapleEntry* entry = new QuadrapleEntry(line, "", "", "");
     this->insertEntry(entry);
 }
@@ -184,7 +193,8 @@ void Quadraples::jumpOperation()
     string line = getCurrentLine();
     this->lineCount++;
     
-    lines_list.push_front(line);
+    //lines_list.push_front(line);
+    lines_list_vec[currentListIndex].push_front(line);
     QuadrapleEntry* entry = new QuadrapleEntry("JMP", "", "", line);
     this->insertEntry(entry);
 }

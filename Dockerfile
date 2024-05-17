@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y \
 RUN apt update -y && apt install build-essential -y
 WORKDIR /app
 
-COPY . /app
+VOLUME /app
 
-RUN make
 CMD ["/bin/bash"]
