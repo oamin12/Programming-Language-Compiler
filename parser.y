@@ -452,7 +452,8 @@ boolExpression : boolExpression AND boolExpression { $$ = ANDing($1, $3);}
                 | NOT boolExpression { $$ = NOTing($2);}
                 | expression boolComparators expression { $$ = CompareValues($1, $3, $2);
                                                               quad.branchingOperation($2);}
-                | boolean { $$ = ConvertFromNumberToString($1);}
+                | boolean { $$ = ConvertFromNumberToString($1);
+                            quad.insertVariable($$);}
                 | ID {
                         SymbolEntry* entry1 = MotherSymbolTree.getEntryByName($1);    
                         if(!entry1)
