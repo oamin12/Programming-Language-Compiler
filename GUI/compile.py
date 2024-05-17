@@ -79,14 +79,18 @@ class MyDialog(QDialog, Ui_Dialog):
             code_text = self.label.text()
 
             # Write the text to input.txt
-            with open("../input.txt", "w") as file:
+            with open("input.txt", "w") as file:
                 file.write(code_text)
+
+            # Clear the output file
+            with open("output.txt", "w") as file:
+                pass  # This will clear the file
 
             # Run the compiler.exe command with input.txt as an argument
             subprocess.run(["./compiler.exe", "input.txt"])
 
             # Read the result from output.txt and display it in label_2
-            with open("../output.txt", "r") as file:
+            with open("output.txt", "r") as file:
                 result_text = file.read()
                 self.label_2.setText(result_text)
         except FileNotFoundError:
