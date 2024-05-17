@@ -38,13 +38,13 @@ void Quadraples::popVariable()
 void Quadraples::unaryOperation(char* operation, char* result)
 {
     string res(result);
-    cout << "res: " << res << endl;
+    // cout << "res: " << res << endl;
     string op(operation);
-    cout << "op: " << op << endl;
+    // cout << "op: " << op << endl;
     string arg1 = labels.top();
-    cout << "arg1: " << arg1 << endl;
+    // cout << "arg1: " << arg1 << endl;
     labels.pop();
-    cout << "label popped" << endl;
+    // cout << "label popped" << endl;
     QuadrapleEntry* entry = new QuadrapleEntry(op, arg1, "", res);
     this->insertEntry(entry);
     this->insertVariable(res);    

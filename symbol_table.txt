@@ -1,9 +1,11 @@
 Scope Name: global
 Scope Type: global
-Children: global0 global1 
+Children: global0 
 Table: 
-Variable Name: rr, type: int, not constant, initialized
-Variable Name: pp, type: int, not constant, initialized
+Variable Name: p, type: int, not constant, not initialized
+Variable Name: no2, type: int, not constant, initialized
+Variable Name: no, type: char, not constant, initialized
+Variable Name: hi, type: int, not constant, initialized
 Variable Name: x, type: int, not constant, initialized
 
 Scope Name: global0
@@ -11,26 +13,12 @@ Scope Type: function_signature
 Parent: global
 Children: global00 
 Table: 
-Variable Name: b, type: int, not constant, not initialized
-Variable Name: q, type: int, not constant, not initialized
-
-Scope Name: global1
-Scope Type: while
-Parent: global
-Table: 
-Variable Name: u, type: int, constant, initialized
-Variable Name: tt, type: int, not constant, initialized
+Variable Name: y, type: int, not constant, not initialized
 
 Scope Name: global00
 Scope Type: function_definition
 Parent: global0
-Children: global000 
 Table: 
-Variable Name: yy, type: int, not constant, initialized
-
-Scope Name: global000
-Scope Type: if
-Parent: global00
-Table: 
-Variable Name: hla, type: int, not constant, initialized
+Variable Name: o, type: int, not constant, initialized
+Variable Name: z, type: int, not constant, initialized
 

@@ -38,11 +38,8 @@ struct SymbolEntry
         else
         {
             char* expressionType = sc.determineType(value.data());
-            printf("Type: %s\n", expressionType);
-            printf("Type: %s\n", Type.data());
             if(sc.matchTypes(Type.data(), expressionType))
             {   
-                printf("Value: %s\n", value.data());
                 this->value = value;
             //     // if(Type == "char")
             //     //     this->value = value[0];

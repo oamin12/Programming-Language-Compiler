@@ -1,0 +1,6 @@
+line [9]: Error: Type mismatch in initialization of no
+line [10]: Error: Function func has wrong parameter type
+line [10]: Error: Function parameters do not match
+line [10]: Error: Type mismatch in initialization of no2
+line [12]: Warning: Variable is not initialized
+

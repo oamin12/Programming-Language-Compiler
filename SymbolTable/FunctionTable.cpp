@@ -30,6 +30,6 @@ void FunctionTable::printTable() const
     cout << "Table: " << endl;
     for (auto entry : this->table)
     {
-        cout << entry.first << " : " << entry.second->variableType << " = " << entry.second->value << endl;
+        cout << "Variable Name: " << entry.first << ", type: " << entry.second->variableType << ", " << (entry.second->isConstant ? "constant" : "not constant") << ", " << (entry.second->isInitialised ? "initialized" : "not initialized") << endl;
     }
 }

@@ -9,6 +9,7 @@
     #include "Quadraples/Quadraples.h"
     
     void yyerror(char* s);
+    void yywarn(char* s);
     int yylex();
     extern FILE* yyin;                          
     extern FILE* yyout;  
@@ -186,7 +187,7 @@ line : dataTypes ID '=' expression';'         {
                             else if (entry->isConstant == true)
                               yyerror("Variable is constant\n");
                             else if(entry->isInitialised == false)
-                              yyerror("Variable is not initialized\n");
+                              yywarn("Variable is not initialized\n");
                             else{
                                 entry->value = std::to_string(stoi(entry->value) + 1);
                                 MotherSymbolTree.currentTable->printTable();
@@ -201,7 +202,7 @@ line : dataTypes ID '=' expression';'         {
                             else if (entry->isConstant == true)
                               yyerror("Variable is constant\n");
                             else if(entry->isInitialised == false)
-                              yyerror("Variable is not initialized\n");
+                              yywarn("Variable is not initialized\n");
                             else{
                                 entry->value = std::to_string(stoi(entry->value) - 1);
                                 MotherSymbolTree.currentTable->printTable();
@@ -216,7 +217,7 @@ line : dataTypes ID '=' expression';'         {
                             else if (entry->isConstant == true)
                               yyerror("Variable is constant\n");
                             else if(entry->isInitialised == false)
-                              yyerror("Variable is not initialized\n");
+                              yywarn("Variable is not initialized\n");
                             else{
                                 entry->value = std::to_string(stoi(entry->value) + 1);
                                 MotherSymbolTree.currentTable->printTable();
@@ -231,7 +232,7 @@ line : dataTypes ID '=' expression';'         {
                             else if (entry->isConstant == true)
                               yyerror("Variable is constant\n");
                             else if(entry->isInitialised == false)
-                              yyerror("Variable is not initialized\n");
+                              yywarn("Variable is not initialized\n");
                             else{
                                 entry->value = std::to_string(stoi(entry->value) - 1);
                                 MotherSymbolTree.currentTable->printTable();
@@ -335,7 +336,7 @@ INT_LITERAL : INTGER_NUMBER {
                               else if (entry->isConstant == true)
                                 yyerror("Variable is constant\n");
                               else if(entry->isInitialised == false)
-                                yyerror("Variable is not initialized\n");
+                                yywarn("Variable is not initialized\n");
                               else{
                                   $$ = stoi(entry->value) + 1;
                                   entry->isUsed = true;
@@ -351,7 +352,7 @@ INT_LITERAL : INTGER_NUMBER {
                               else if (entry->isConstant == true)
                                 yyerror("Variable is constant\n");
                               else if(entry->isInitialised == false)
-                                yyerror("Variable is not initialized\n");
+                                yywarn("Variable is not initialized\n");
                               else{
                                   $$ = stoi(entry->value) - 1;
                                   entry->isUsed = true;
@@ -367,7 +368,7 @@ INT_LITERAL : INTGER_NUMBER {
                               else if (entry->isConstant == true)
                                 yyerror("Variable is constant\n");
                               else if(entry->isInitialised == false)
-                                yyerror("Variable is not initialized\n");
+                                yywarn("Variable is not initialized\n");
                               else{
                                   $$ = stoi(entry->value);
                                   entry->isUsed = true;
@@ -383,7 +384,7 @@ INT_LITERAL : INTGER_NUMBER {
                               else if (entry->isConstant == true)
                                 yyerror("Variable is constant\n");
                               else if(entry->isInitialised == false)
-                                yyerror("Variable is not initialized\n");
+                                yywarn("Variable is not initialized\n");
                               else{
                                   $$ = stoi(entry->value);
                                   entry->isUsed = true;
@@ -458,7 +459,7 @@ boolExpression : boolExpression AND boolExpression { $$ = ANDing($1, $3);}
                         if(!entry1)
                           yyerror("Variable is not declared\n");
                         else if (entry1->isInitialised == false)
-                          yyerror("Variable is not initialized\n");
+                          yywarn("Variable is not initialized\n");
                         else if(entry1->variableType != "int" && entry1->variableType != "float" && entry1->variableType != "bool")
                           yyerror("Variable is not a boolean\n");
                         else
@@ -627,7 +628,7 @@ forLoopIncDecExpression : ID '=' expression {$$ = $1;}
                               else if (entry->isConstant == true)
                                 yyerror("Variable is constant\n");
                               else if(entry->isInitialised == false)
-                                yyerror("Variable is not initialized\n");
+                                yywarn("Variable is not initialized\n");
                               else{
                                   ConvertFromNumberToString(stoi(entry->value) + 1);
                                   entry->value = std::to_string(stoi(entry->value) + 1);
@@ -647,7 +648,7 @@ forLoopIncDecExpression : ID '=' expression {$$ = $1;}
                               else if (entry->isConstant == true)
                                 yyerror("Variable is constant\n");
                               else if(entry->isInitialised == false)
-                                yyerror("Variable is not initialized\n");
+                                yywarn("Variable is not initialized\n");
                               else{
                                   ConvertFromNumberToString(stoi(entry->value) - 1);
                                   entry->value = std::to_string(stoi(entry->value) - 1);
@@ -668,7 +669,7 @@ forLoopIncDecExpression : ID '=' expression {$$ = $1;}
                               else if (entry->isConstant == true)
                                 yyerror("Variable is constant\n");
                               else if(entry->isInitialised == false)
-                                yyerror("Variable is not initialized\n");
+                                yywarn("Variable is not initialized\n");
                               else{
                                   ConvertFromNumberToString(stoi(entry->value));
                                   entry->value = std::to_string(stoi(entry->value) + 1);
@@ -688,7 +689,7 @@ forLoopIncDecExpression : ID '=' expression {$$ = $1;}
                               else if (entry->isConstant == true)
                                 yyerror("Variable is constant\n");
                               else if(entry->isInitialised == false)
-                                yyerror("Variable is not initialized\n");
+                                yywarn("Variable is not initialized\n");
                               else{
                                   ConvertFromNumberToString(stoi(entry->value));
                                   entry->value = std::to_string(stoi(entry->value) - 1);

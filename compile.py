@@ -92,9 +92,25 @@ class MyDialog(QDialog, Ui_Dialog):
             subprocess.run(["./compiler.exe", "input.txt"])
 
             # Read the result from output.txt and display it in label_2
+            res = ""
+            res += "Output:\n"
             with open("output.txt", "r") as file:
                 result_text = file.read()
-                self.result_text.setText(result_text)
+                res += result_text
+                # self.result_text.setText(result_text)
+            
+            res += "\n\nErrors:\n"
+            with open("errors.txt", "r") as file:
+                result_text = file.read()
+                res += result_text
+                # self.result_text.setText(result_text)
+                
+            res += "\n\nSymbol Table:\n"
+            with open("symbol_table.txt", "r") as file:
+                result_text = file.read()
+                res += result_text
+            
+            self.result_text.setText(res)
         except FileNotFoundError:
             print("Error: compiler.exe or output.txt not found!")
 

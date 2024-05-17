@@ -43,7 +43,7 @@ void SymbolTable::printTable() const
     cout << "Table: " << endl;
     for (auto entry : this->table)
     {
-        cout << entry.first << " : " << entry.second->variableType << " = " << entry.second->value << endl;
+        cout << entry.first << " : " << entry.second->variableType << endl;
     }
 }
 
@@ -61,7 +61,7 @@ void SymbolTable::printTableInFile(std::ostream& os) const
     os << "Table: " << endl;
     for (auto entry : this->table)
     {
-        os << "Variable Name: " << entry.first << ", type: " << entry.second->variableType << ", " << (entry.second->isConstant ? "constant" : "not constant") << ", " << (entry.second->isInitialised ? "initialized" : "not initialized") << ", value: " << entry.second->value << endl;
+        os << "Variable Name: " << entry.first << ", type: " << entry.second->variableType << ", " << (entry.second->isConstant ? "constant" : "not constant") << ", " << (entry.second->isInitialised ? "initialized" : "not initialized") << endl;
     }
 }
 

@@ -8,3 +8,5 @@ int func(int y){
 int hi = func(x);
 char no = func(5);
 int no2 = func('a');
+int p;
+p++;
