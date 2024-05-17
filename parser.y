@@ -16,6 +16,7 @@
     char* caseIdentifier;
     char* switchIdentifier;
     int flagFunction = 0;
+    int assignFunToVar = 0;
 
     Quadraples quad;
 
@@ -180,7 +181,7 @@ line : dataTypes ID '=' expression';'         {
       | switchCase {}
       | function {}
       | blockScope {}
-      | functionCall ';' {} 
+      | functionCall ';' {quad.insertEntry("Call",$1,"","");} 
       | returnStatement ';' {}
       | INCREMENT ID ';' {
                             SymbolEntry* entry = MotherSymbolTree.getEntryByName($2);
@@ -256,7 +257,10 @@ dataTypes : INT { $$ = $1;}
 /* Expression */
 expression : mathExpression {$$ = $1;}
             | boolExpression {$$ = $1;}
-            | functionCall {$$ = $1;}
+            | functionCall {$$ = $1;
+                            char* label = quad.getCurrentLabel();
+                            quad.binaryOperation("call", label);
+                            }
             | CHAR_LITERAL { $$ = ConvertFromCharToString($1);}
             | STRING_LITERALS {$$ = $1;}
             ;
@@ -446,7 +450,8 @@ boolExpression : boolExpression AND boolExpression { $$ = ANDing($1, $3);}
                 | NOT boolExpression { $$ = NOTing($2);}
                 | expression boolComparators expression { $$ = CompareValues($1, $3, $2);
                                                               quad.branchingOperation($2);}
-                | boolean { $$ = ConvertFromNumberToString($1);}
+                | boolean { $$ = ConvertFromNumberToString($1);
+                            quad.insertVariable($$);}
                 | ID {
                         SymbolEntry* entry1 = MotherSymbolTree.getEntryByName($1);    
                         if(!entry1)
@@ -826,7 +831,7 @@ functionCall : ID '(' functionCallParameters ')'{
                                                     {
                                                       $$ = concatenateTwoStrings(func->functionName.data(), func->returnType.data());
                                                       printf("Function Call: %s\n", $$);
-
+                                                      quad.insertVariable($1);
                                                     }
                                                   }
                                                 }

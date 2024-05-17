@@ -1,0 +1,4 @@
+int j = 0;
+for(int x = 0; x < 10; x++) {
+    j = j + x;
+}
