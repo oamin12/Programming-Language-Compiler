@@ -65,6 +65,8 @@ class Ui_Dialog(object):
         self.label_2.setText(_translate("Dialog", "Result"))
         self.Compile_btn.setText(_translate("Dialog", "Compile"))
         self.close_btn.setText(_translate("Dialog", "Close"))
+        self.result_text
+        self.code_text
 
 class MyDialog(QDialog, Ui_Dialog):
     def __init__(self):
@@ -76,8 +78,7 @@ class MyDialog(QDialog, Ui_Dialog):
         # Define the action to be performed when Compile_btn is clicked
         try:
             # Extract text from the QLabel
-            code = self.code_text.text()
-
+            code = self.code_text.toPlainText()
             # Write the text to input.txt
             with open("input.txt", "w") as file:
                 file.write(code)
