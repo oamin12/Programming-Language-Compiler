@@ -21,5 +21,6 @@ public:
     void endCurrentScope(string scopeType);
     void addSymbolEntry(string variableName, string variableType, string value = "0x0000", bool isInitialised = false, bool isConstant = false);
     SymbolTable* contains(string scopeName);
+    void printAllTables(string filename="symbol_table.txt") const;
     ~SymbolTree();
 };

@@ -12,6 +12,9 @@
     
     void yyerror(char* s);
     int yylex();
+    extern FILE* yyin;                          
+    extern FILE* yyout;  
+    int yylineno = 1;                
     char* caseIdentifier;
     char* switchIdentifier;
     int flagFunction = 0;
@@ -62,7 +65,6 @@
 
 /* End of Part1 */ 
 %right '='
-%right ELSE
 %left '+' '-'
 %left '*' '/' '%'
 
@@ -77,10 +79,12 @@ S : Code                 {}
 
 
 Code : line { 
-            quad.printQuadraples();
+              quad.printQuadraples();
               quad.printQuadraplesToFile("output.txt");
             }
-     | Code line {quad.printQuadraples();
+     | Code line {
+                  MotherSymbolTree.printAllTables();
+                  quad.printQuadraples();
                   quad.printQuadraplesToFile("output.txt");
      }
      ;
@@ -90,13 +94,13 @@ Code : line {
 line : dataTypes ID '=' expression';'         { 
                                                 bool isContained = MotherSymbolTree.currentTable->contains($2);
                                                 if(isContained){
+                                                  yyerror("Variable already declared");
                                                   printf("Variable already declared\n");
                                                 }else{
                                                   char* expressionType = sc.determineType($4);
 
                                                   if(sc.matchTypes($1, expressionType)){
-                                                    printf("Type Match type1 = %s, type2 = %s\n", $1, expressionType);
-                                                    // $2 is the ID and $1 is the data type
+                                                    // printf("Type Match type1 = %s, type2 = %s\n", $1, expressionType);
                                                     SymbolEntry* entry = new SymbolEntry($2, $1, $4, true);
                                                     //add to quadruple
                                                     // printf("Inserting variable: %s\n", $2);
@@ -134,7 +138,7 @@ line : dataTypes ID '=' expression';'         {
                                                 }
                                               }
       | ID '=' expression';' {
-                                printf("Variable Assignment: Name: %s\n", $1);
+                                // printf("Variable Assignment: Name: %s\n", $1);
                                 
                                 SymbolTable* table = MotherSymbolTree.getScopeSymbolTable($1);
                                 if(table == NULL){
@@ -149,7 +153,6 @@ line : dataTypes ID '=' expression';'         {
                                     quad.unaryOperation("MOV", $1);
                                     quad.popVariable();
                                     quad.resetCount();
-                                    printf("Variable is not constant\n");
                                     entry->value = $3;
                                     entry->isInitialised = true;
                                     // printf("Variable intialized to the symbol table\n");
@@ -239,6 +242,7 @@ line : dataTypes ID '=' expression';'         {
                                 MotherSymbolTree.currentTable->printTable();
                             }
                           }
+      | epsilon {}
       ;
 
 dataTypes : INT { $$ = $1;}
@@ -790,24 +794,20 @@ function : functionSignature blockScope {
                                         }
          ;
 
-functionSignature : dataTypes ID beginFunctionBracket functionParameters ')' {
+functionSignature : dataTypes ID '(' functionParameters ')' {
                                                                                 FunctionTable* function = MotherSymbolTree.addFunctionTable($2, $1, $4);
                                                                                 if (function == NULL)
                                                                                   printf("Syntax Error!");
-                                                                                else{
+                                                                                else
+                                                                                {
+                                                                                  printf("Function Signature Scope Begin\n"); 
                                                                                   MotherSymbolTree.currentTable->printTable();
                                                                                   quad.isFunctionFlag = 1;
                                                                                   quad.insertEntry(concatenateTwoStrings($2,":"),"","","");
                                                                                 }
+                    
                                                                               }
                   ; 
-
-beginFunctionBracket : '(' { 
-                      MotherSymbolTree.addSymbolTableAndBeginScope(); 
-                      printf("Function Scope Begin\n"); 
-                      MotherSymbolTree.currentTable->printTable();
-                    }
-              ;
 
 functionParameters : functionParameters ',' dataTypes ID {$$ = concatenateThreeStrings($1,$3,$4);}
                    | dataTypes ID {$$ = concatenateTwoStrings($1,$2);}
@@ -857,8 +857,8 @@ ID : IDENTIFIER {$$ = $1;}
 
 /*Part3 - Subroutines*/
 void yyerror(char *msg){
-  fprintf(stderr, "%s\n", msg);
-  exit(1);
+  /* fprintf(stderr, "%s\n", msg); */
+  fprintf(yyout, "line [%d]: %s\n", yylineno, msg);
 }
 
 int main(int argc, char** argv){
@@ -881,5 +881,10 @@ int main(int argc, char** argv){
   }while(!feof(yyin));
 
 
+  yyout = fopen("errors.txt", "w");
+  /* yyparse(); */
+  fclose(yyin);
+  fclose(yyout);
+  MotherSymbolTree.printAllTables();
   return 0;
 }
