@@ -15,7 +15,6 @@ struct SymbolEntry
     bool isUsed = false;
     SymbolEntry(string Name, string Type, string value = "0x0000", bool isInitialised = false, bool isConstant = false)
     {
-        cout << "Value is:" << value << endl;
         this->variableName = Name;
         this->variableType = Type;
 
@@ -46,5 +45,6 @@ public:
     bool contains(string entryName);
     SymbolEntry* getEntry(string entryName);
     virtual void printTable() const;
+    void printTableInFile(std::ostream& os) const;
     virtual ~SymbolTable();
 };

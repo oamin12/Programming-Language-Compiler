@@ -77,6 +77,7 @@
 [0-9]+\.[0-9]+ {yylval.floatValue = atof(yytext); return FLOAT_NUMBER;}
 \"[^\"]*\" {yylval.stringValue = strdup(yytext); return STRING_IDENTIFIER;}
 \'[^\'\"]\' {yylval.chrValue = yytext[1]; return CHAR_IDENTIFIER;}
+[\n]   {yylineno++;}
 . {return yytext[0];}
 
 %%
