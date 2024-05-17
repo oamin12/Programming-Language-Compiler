@@ -4,6 +4,7 @@
 #include <cstring>
 #include <list>
 #include <stack>
+#include <vector>
 #include <fstream>
 using namespace std;
 
@@ -44,6 +45,7 @@ private:
     stack<string> labels;
     stack<string> lines; // for branching statements line1: line2: etc
     list<string> lines_list; // we use it to pop back the lines for the if else statements
+    vector<list<string>> lines_list_vec; // we use it to pop back the lines for the if else statements to handle nested if else
     stack<string> loops; // for loops
     ///Switch case
     list<string> casesIDs;
@@ -52,6 +54,7 @@ private:
     void incrementLabelCount();
     
 public:
+    int currentListIndex = -1; // for nested if else
     Quadraples();
     void insertEntry(QuadrapleEntry* entry);
     void insertEntry(string operation, string arg1, string arg2, string result);

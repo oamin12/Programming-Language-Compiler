@@ -470,16 +470,33 @@ boolComparators : GREATERTHANEQUAL {$$ = $1;}
                 ;
 
 /* ########################## IF-ELSE EXPRESSIONS  ##########################*/
-ifStatement : ifScope { quad.addLine2();}
-            | ifScope elseScope 
+ifStatement : ifScope { printf("If Scope EndEHHHHHHHHHHH\n");
+                        quad.currentListIndex -= 1;
+                        printf("If Scope EndAAAA\n");
+                        if(quad.currentListIndex != -1)
+                        {                         
+                           quad.addLine2();
+                        }
+                      }
+            | ifScope elseScope { printf("If Scope End\n");
+                                  quad.currentListIndex -= 1;
+                                  printf("If Scope End\n");
+                                  if(quad.currentListIndex != -1){
+                                    quad.addLine2();}
+
+                                  }
             ;
 
-ifScope : IF '(' boolExpression ')' blockScope  { MotherSymbolTree.endCurrentScope("if"); 
+ifScope : IfLabel '(' boolExpression ')' blockScope  { MotherSymbolTree.endCurrentScope("if"); 
                                                   printf("If Scope End\n"); 
                                                   MotherSymbolTree.currentTable->printTable();
                                                 }
         ;
 
+IfLabel : IF { 
+                quad.currentListIndex += 1;
+             }
+        ;
 
 elseScope : ElseLabel blockScope { MotherSymbolTree.endCurrentScope("else"); 
                               printf("Else Scope End\n"); 

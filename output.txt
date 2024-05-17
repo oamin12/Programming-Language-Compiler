@@ -1,0 +1,8 @@
+ MOV 0  x
+ Loop0:   
+ CMP x 100 
+ JGE   Line0
+ MOV 21  j
+ INC x  
+ JMP   Loop0
+ Line0:   
