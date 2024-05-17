@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "../utils.h"
 
 using namespace std;
 struct SymbolEntry
@@ -17,14 +18,33 @@ struct SymbolEntry
     {
         this->variableName = Name;
         this->variableType = Type;
-
-        if(Type == "char")
-            this->value = value[0];
-        else if(Type == "int")
-            this->value = to_string((int)stof(value));
+        vector<string> param = splitString(value);
+        for (int i = 0; i < param.size(); i++)
+        {
+            cout << param[i] << " ";
+        }
+        if(param.size() == 2)
+        {
+            if (Type == param[1])
+                this->isInitialised = true;
+            else
+            {
+                string errorMsg = "Type mismatch in initialization of " + Name;
+                cout << errorMsg;
+            }
+                
+        }
+            
         else
-            this->value = value;
-
+        {
+            if(Type == "char")
+                this->value = value[0];
+            else if(Type == "int")
+                this->value = to_string((int)stof(value));
+            else
+                this->value = value;
+        }
+        cout << "HERE\n";
         this->isInitialised = isInitialised;
         this->isConstant = isConstant;
     }

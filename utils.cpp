@@ -1,5 +1,4 @@
 #include "utils.h"
-
 // char* ConvertFromNumberToString(float number)
 // {
 //     return strdup(to_string(number).c_str());

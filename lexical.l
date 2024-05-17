@@ -4,7 +4,7 @@
     #include <stdio.h>
     #include<string.h>
     // int yylval;
-    int yyerror(char *s); 
+    void yyerror(char *);
     extern int yylineno;
 	int yylex();
 %}
@@ -68,9 +68,14 @@
 
 [ \t]       ; 
 
+"//".*   {;}
+"/*"([^\*]|[\r\n]|(\*+([^\*/]|[\r\n])))*"*"+"/" {;}
+
+
+
 
     /* "//" {while(input() != '\n'); return EOL;}
-    "/*" {char c; char p = 0; while((c = input()) != 0) {if(p == '*' && c == '/') break; p = c;} return EOL;} */
+    "/*" {char c; char p = 0; while((c = input()) != 0) {if(p == '*' && c == '/') break; p = c;} */
 
 [a-zA-Z][a-zA-Z0-9_]* {yylval.idValue = strdup(yytext); return IDENTIFIER;}
 ((0)|([1-9][0-9]*)) {yylval.intValue = atoi(yytext); return INTGER_NUMBER;}

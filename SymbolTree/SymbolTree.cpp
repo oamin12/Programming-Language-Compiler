@@ -141,8 +141,67 @@ void SymbolTree::printAllTables(string filename) const {
     } else {
         cout << "Unable to open file for writing" << std::endl;
     }
+}
 
-    
+bool SymbolTree::checkFunctionParameters(char* functionName, char* functionParams)
+{
+    string params = string(functionParams);
+    vector<string> paramList = splitString(params, ',');
+    FunctionTable* table = this->getFunctionTable(functionName);
+    if (paramList.size() != table->parameterNames.size())
+    {
+        cout << "Function " << functionName << " has wrong number of parameters" << endl;
+        return false;
+    }
+    for (int i = 0; i < paramList.size(); i++)
+    {
+        string param = paramList[i];
+        vector<string> paramParts = splitString(param, ' ');
+        if (paramParts.size() == 1)
+        {
+            if (sc.determineType(paramParts[0].data()) != table->parameterTypes[i])
+            {
+                cout << "Function " << functionName << " has wrong parameter type" << endl;
+                return false;
+            }
+        }
+        else if (paramParts.size() == 2)
+        {
+            if (paramParts[1] != table->parameterTypes[i])
+            {
+                cout << "Function " << functionName << " has wrong parameter type" << endl;
+                return false;
+            }
+        }
+
+    }
+    return true;
+}
+
+bool SymbolTree::assignVariables(string var, SymbolEntry* entry)
+{
+    cout << var << " " << entry->variableType << endl;
+    vector<string> param = splitString(var);
+    for (int i = 0; i < param.size(); i++)
+    {
+        cout << param[i] << " ";
+    }
+    if(param.size() == 2)
+    {
+        if (entry->variableType == param[1])
+            entry->isInitialised = true;
+        else
+        {
+            return false;
+        }
+            
+    }
+    else
+    {
+        entry->value = var;
+        entry->isInitialised = true;
+    }
+    return true;
 }
 
 SymbolTree::~SymbolTree()

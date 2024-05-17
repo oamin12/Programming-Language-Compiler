@@ -54,7 +54,7 @@
 
 %token <idValue> IDENTIFIER
 
-%type <stringValue> dataTypes boolComparators STRING_LITERALS mathExpression boolExpression expression functionCall blockScope returnStatement forLoopIncDecExpression beginScope functionParameters
+%type <stringValue> dataTypes boolComparators STRING_LITERALS mathExpression boolExpression expression functionCall blockScope returnStatement forLoopIncDecExpression beginScope functionParameters functionCallParameters
 %type <boolValue> boolean
 %type <idValue> ID IDCase
 %type <intValue> INT_LITERAL caseIdentifierInt
@@ -81,7 +81,6 @@ Code : line {
               quad.printQuadraplesToFile("output.txt");
             }
      | Code line {
-                  MotherSymbolTree.printAllTables();
                   quad.printQuadraples();
                   quad.printQuadraplesToFile("output.txt");
      }
@@ -93,7 +92,6 @@ line : dataTypes ID '=' expression';'         {
                                                 bool isContained = MotherSymbolTree.currentTable->contains($2);
                                                 if(isContained){
                                                   yyerror("Variable already declared");
-                                                  printf("Variable already declared\n");
                                                 }else{
                                                   char* expressionType = sc.determineType($4);
 
@@ -132,15 +130,15 @@ line : dataTypes ID '=' expression';'         {
                                                   quad.resetCount();
                                                   // Add the entry to the symbol table
                                                   MotherSymbolTree.currentTable->insert(entry); 
-                                                  // printf("Variable added to the symbol table\n");
+                                                  printf("Constant added to the symbol table\n");
                                                 }
                                               }
       | ID '=' expression';' {
-                                // printf("Variable Assignment: Name: %s\n", $1);
+                                printf("Variable Assignment: Name: %s\n", $1);
                                 
                                 SymbolTable* table = MotherSymbolTree.getScopeSymbolTable($1);
                                 if(table == NULL){
-                                  printf("Variable is not declared\n");
+                                  yyerror("Variable is not declared\n");
                                 }else{
                                   SymbolEntry* entry = table->getEntry($1);
                                   //add to quadruple
@@ -151,10 +149,14 @@ line : dataTypes ID '=' expression';'         {
                                     quad.unaryOperation("MOV", $1);
                                     quad.popVariable();
                                     quad.resetCount();
-                                    entry->value = $3;
-                                    entry->isInitialised = true;
-                                    // printf("Variable intialized to the symbol table\n");
-                                    MotherSymbolTree.currentTable->printTable();
+                                    bool isMismatch = MotherSymbolTree.assignVariables($3, entry);
+                                    if (!isMismatch)
+                                    {
+                                        string errorMsg = "Type mismatch in initialization of " + entry->variableName;
+                                        yyerror(errorMsg.data());
+                                    }
+                                    else
+                                      MotherSymbolTree.currentTable->printTable();
                                   }
                                 }
                               }
@@ -254,7 +256,7 @@ dataTypes : INT { $$ = $1;}
 /* Expression */
 expression : mathExpression {$$ = $1;}
             | boolExpression {$$ = $1;}
-            | functionCall {}
+            | functionCall {$$ = $1;}
             | CHAR_LITERAL { $$ = ConvertFromCharToString($1);}
             | STRING_LITERALS {$$ = $1;}
             ;
@@ -311,8 +313,6 @@ math3 : '(' math1 ')' {$$ = $2;}
               SymbolEntry* entry1 = MotherSymbolTree.getEntryByName($1);    
               if(!entry1)
                 printf("Variable %s is not declared\n", $1);
-              else if(entry1->variableType != "int" && entry1->variableType != "float")
-                printf("Variable %s is not a number\n", $1);
               else
               {
                 $$ = stof(entry1->value);
@@ -409,9 +409,7 @@ STRING_LITERALS : STRING_IDENTIFIER {
                                     // printf("Inserted string variable: %s\n", $1);
                                     }
                 | NULLL {$$ = $1;}
-                | ID {$$ = $1;}
                 ;
-
 
 /* ########################## BOOLEAN EXPRESSIONS  ##########################*/
 /* bool1 is > < >= <= */
@@ -812,11 +810,31 @@ functionParameters : functionParameters ',' dataTypes ID {$$ = concatenateThreeS
                    | epsilon {$$ = "";}
                    ;
 
-functionCall : ID '(' functionCallParameters ')'{ }
+functionCall : ID '(' functionCallParameters ')'{ 
+                                                  FunctionTable* func = MotherSymbolTree.getFunctionTable($1);
+                                                  if (func == NULL)
+                                                  {
+                                                    string errorMsg = "Function" + string($1) +  "is not declared";
+                                                    yyerror(errorMsg.data());
+                                                  }
+                                                  else
+                                                  {
+                                                    bool isMatched = MotherSymbolTree.checkFunctionParameters($1, $3);
+                                                    if(!isMatched)
+                                                      yyerror("Function parameters do not match");
+                                                    else
+                                                    {
+                                                      $$ = concatenateTwoStrings(func->functionName.data(), func->returnType.data());
+                                                      printf("Function Call: %s\n", $$);
+
+                                                    }
+                                                  }
+                                                }
              ;
 
-functionCallParameters : functionCallParameters ',' expression {}
-                       | expression {}
+functionCallParameters : functionCallParameters ',' expression {
+                      $$ = concatenateThreeStrings($1, $3, ""); }
+                       | expression {$$ = $1;}
                        | epsilon {}
                        ;
 
@@ -856,7 +874,11 @@ ID : IDENTIFIER {$$ = $1;}
 /*Part3 - Subroutines*/
 void yyerror(char *msg){
   /* fprintf(stderr, "%s\n", msg); */
-  fprintf(yyout, "line [%d]: %s\n", yylineno, msg);
+  fprintf(yyout, "line [%d]: Error: %s\n", yylineno, msg);
+}
+
+void yywarn(char *msg){
+  fprintf(yyout, "line [%d]: Warning: %s\n", yylineno, msg);
 }
 
 int main(int argc, char** argv){
