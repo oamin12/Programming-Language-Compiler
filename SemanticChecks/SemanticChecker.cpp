@@ -87,7 +87,9 @@ bool SemanticChecker::matchTypes(char* type1, char* type2)
     if((strcmp(type1, type2) == 0) || //same type
         (strcmp(type1, "int") == 0 && strcmp(type2, "float") == 0) ||  //int to float
         (strcmp(type1, "float") == 0 && strcmp(type2, "int") == 0) || //float to int
-        (strcmp(type1, "string") == 0 && strcmp(type2, "char") == 0)) //string to char
+        (strcmp(type1, "string") == 0 && strcmp(type2, "char") == 0)||
+        (strcmp(type1, "int") == 0 && strcmp(type2, "bool") == 0)||
+        (strcmp(type1, "bool") == 0 && strcmp(type2, "int") == 0))
         return true;
 
     return false;
