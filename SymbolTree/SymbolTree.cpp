@@ -11,6 +11,8 @@ using namespace std;
 
 #include "../utils.h"
 
+extern void yyerror(char *msg);
+
 SymbolTree::SymbolTree()
 {
     this->globalTable = new SymbolTable("global", nullptr, {});
@@ -76,7 +78,8 @@ FunctionTable* SymbolTree::addFunctionTable(string functionName, string returnTy
     unordered_set<string> uniqueParams(parameterNames.begin(), parameterNames.end());
     if (uniqueParams.size() != parameterNames.size())
     {
-        cout << "Function " << functionName << " has duplicate parameters" << endl;
+        string errorMsg = "Function " + functionName + " has duplicate parameters";
+        yyerror(errorMsg.data());
         return nullptr;
     }
     for (int i = 0; i < parameterTypes.size(); i++)
@@ -105,7 +108,8 @@ void SymbolTree::addSymbolEntry(string variableName, string variableType, string
 {
     if (this->currentTable->contains(variableName))
     {
-        cout << "Variable " << variableName << " is already declared in this scope" << endl;
+        string errorMsg = "Variable " + variableName + " is already declared in this scope";
+        yyerror(errorMsg.data());
         return;
     }
     SymbolEntry* entry = new SymbolEntry(variableName, variableType, value, isInitialised, isConstant);
@@ -150,7 +154,9 @@ bool SymbolTree::checkFunctionParameters(char* functionName, char* functionParam
     FunctionTable* table = this->getFunctionTable(functionName);
     if (paramList.size() != table->parameterNames.size())
     {
-        cout << "Function " << functionName << " has wrong number of parameters" << endl;
+        string errorMsg = "Function " + string(functionName) + " has wrong number of parameters";
+        yyerror(errorMsg.data());
+        // cout << "Function " << functionName << " has wrong number of parameters" << endl;
         return false;
     }
     for (int i = 0; i < paramList.size(); i++)
@@ -161,7 +167,9 @@ bool SymbolTree::checkFunctionParameters(char* functionName, char* functionParam
         {
             if (sc.determineType(paramParts[0].data()) != table->parameterTypes[i])
             {
-                cout << "Function " << functionName << " has wrong parameter type" << endl;
+                string errorMsg = "Function " + string(functionName) + " has wrong parameter type";
+                // cout << "Function " << functionName << " has wrong parameter type" << endl;
+                yyerror(errorMsg.data());
                 return false;
             }
         }
@@ -169,7 +177,9 @@ bool SymbolTree::checkFunctionParameters(char* functionName, char* functionParam
         {
             if (paramParts[1] != table->parameterTypes[i])
             {
-                cout << "Function " << functionName << " has wrong parameter type" << endl;
+                string errorMsg = "Function " + string(functionName) + " has wrong parameter type";
+                yyerror(errorMsg.data());
+                // cout << "Function " << functionName << " has wrong parameter type" << endl;
                 return false;
             }
         }
@@ -200,6 +210,41 @@ bool SymbolTree::assignVariables(string var, SymbolEntry* entry)
     {
         entry->value = var;
         entry->isInitialised = true;
+    }
+    return true;
+}
+
+bool SymbolTree::checkFunctionReturnType(string value)
+{
+    FunctionTable* table = dynamic_cast<FunctionTable*>(this->currentTable->parent);
+    if (!table) yyerror("Return statement outside of function");
+    else if (table->returnType == "void")
+    {
+        string errorMsg = "Function " + table->functionName + " is void, it must have no return type";
+        yyerror(errorMsg.data());
+        return false;
+    }
+    else {
+        vector<string> param = splitString(value);
+        if(param.size() == 2)
+        {
+            if (table->returnType != param[1])
+            {
+                string errorMsg = "Type mismatch in return statement of " + table->functionName;
+                yyerror(errorMsg.data());
+                return false;
+            }
+        }
+        else
+        {
+            if (sc.determineType(value.data()) != table->returnType)
+            {
+                string errorMsg = "Function " + string( table->functionName) + " has wrong return type";
+                yyerror(errorMsg.data());
+                return false;
+            }
+                
+        }
     }
     return true;
 }

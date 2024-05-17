@@ -81,7 +81,7 @@
 ((0)|([1-9][0-9]*)) {yylval.intValue = atoi(yytext); return INTGER_NUMBER;}
 [0-9]+\.[0-9]+ {yylval.floatValue = atof(yytext); return FLOAT_NUMBER;}
 \"[^\"]*\" {yylval.stringValue = strdup(yytext); return STRING_IDENTIFIER;}
-\'[^\'\"]\' {yylval.chrValue = yytext[1]; return CHAR_IDENTIFIER;}
+\'[^\']\' {yylval.chrValue = yytext[1]; return CHAR_IDENTIFIER;}
 [\n]   {yylineno++;}
 . {return yytext[0];}
 

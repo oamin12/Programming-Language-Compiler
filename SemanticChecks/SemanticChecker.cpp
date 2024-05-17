@@ -63,17 +63,17 @@ bool SemanticChecker::isString(char* str)
 
 bool SemanticChecker::isChar(char* letter)
 {
-    if(strlen(letter) == 2 && isAlphaNumeric(letter[0]))
+    if(strlen(letter) == 1 && isAlphaNumeric(letter[0]))
         return true;
     return false;
 }
 
-// bool SemanticChecker::isBool(char* str)
-// {
-//     if(strcmp(str, "true") == 0 || strcmp(str, "false") == 0)
-//         return true;
-//     return false;
-// }
+bool SemanticChecker::isBool(char* str)
+{
+    if(strcmp(str, "true") == 0 || strcmp(str, "false") == 0)
+        return true;
+    return false;
+}
 
 bool SemanticChecker::isAlphaNumeric(char letter)
 {
@@ -84,12 +84,13 @@ bool SemanticChecker::isAlphaNumeric(char letter)
 
 bool SemanticChecker::matchTypes(char* type1, char* type2)
 {
+    printf("type1: %s, type2: %s\n", type1, type2);
     if((strcmp(type1, type2) == 0) || //same type
         (strcmp(type1, "int") == 0 && strcmp(type2, "float") == 0) ||  //int to float
         (strcmp(type1, "float") == 0 && strcmp(type2, "int") == 0) || //float to int
-        (strcmp(type1, "string") == 0 && strcmp(type2, "char") == 0)||
-        (strcmp(type1, "int") == 0 && strcmp(type2, "bool") == 0)||
-        (strcmp(type1, "bool") == 0 && strcmp(type2, "int") == 0))
+        (strcmp(type1, "string") == 0 && strcmp(type2, "char") == 0) ||//string to char
+        (strcmp(type1, "int") == 0 && strcmp(type2, "bool") == 0) || //int to bool
+        (strcmp(type1, "bool") == 0 && strcmp(type2, "int") == 0)) //bool to int
         return true;
 
     return false;
@@ -111,8 +112,8 @@ char* SemanticChecker::determineType(char* str)
         return (char*)"int";
     else if(isFloat(str))
         return (char*)"float";
-    // else if(isBool(str))
-    //     return (char*)"bool";
+    else if(isBool(str))
+        return (char*)"bool";
     else if(isString(str))
         return (char*)"string";
     else if(isChar(str))

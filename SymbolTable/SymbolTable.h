@@ -4,8 +4,12 @@
 #include <unordered_map>
 #include <vector>
 #include "../utils.h"
-
 using namespace std;
+#include "../SemanticChecks/SemanticChecker.h"
+
+extern SemanticChecker sc;
+extern void yyerror(char *msg);
+
 struct SymbolEntry
 {
     string variableName;
@@ -14,15 +18,11 @@ struct SymbolEntry
     bool isInitialised;
     bool isConstant;
     bool isUsed = false;
-    SymbolEntry(string Name, string Type, string value = "0x0000", bool isInitialised = false, bool isConstant = false)
+    SymbolEntry(string Name, string Type, string value = "0", bool isInitialised = false, bool isConstant = false)
     {
         this->variableName = Name;
         this->variableType = Type;
         vector<string> param = splitString(value);
-        for (int i = 0; i < param.size(); i++)
-        {
-            cout << param[i] << " ";
-        }
         if(param.size() == 2)
         {
             if (Type == param[1])
@@ -30,21 +30,35 @@ struct SymbolEntry
             else
             {
                 string errorMsg = "Type mismatch in initialization of " + Name;
-                cout << errorMsg;
+                yyerror(errorMsg.data());
             }
                 
         }
             
         else
         {
-            if(Type == "char")
-                this->value = value[0];
-            else if(Type == "int")
-                this->value = to_string((int)stof(value));
-            else
+            char* expressionType = sc.determineType(value.data());
+            printf("Type: %s\n", expressionType);
+            printf("Type: %s\n", Type.data());
+            if(sc.matchTypes(Type.data(), expressionType))
+            {   
+                printf("Value: %s\n", value.data());
                 this->value = value;
+            //     // if(Type == "char")
+            //     //     this->value = value[0];
+            //     // else if(Type == "int")
+            //     //     this->value = value;
+            //     //     // this->value = to_string((int)stof(value));
+            //     // else
+            //     //     this->value = value;
+                
+            }
+            else
+            {
+                string errorMsg = "Type mismatch in initialization of " + Name;
+                yyerror(errorMsg.data());
+            }
         }
-        cout << "HERE\n";
         this->isInitialised = isInitialised;
         this->isConstant = isConstant;
     }
