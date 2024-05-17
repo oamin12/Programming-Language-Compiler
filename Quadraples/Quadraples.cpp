@@ -7,7 +7,15 @@ Quadraples::Quadraples()
 
 void Quadraples::insertEntry(QuadrapleEntry* entry)
 {
-    this->quadraples.push_back(entry);
+    if(isFunctionFlag == 0)
+    {
+        this->quadraples.push_back(entry);
+    }
+    else
+    {
+        this->quadraples_functions.push_back(entry);
+    }
+    //this->quadraples.push_back(entry);
     this->incrementCount();
 }
 
@@ -310,6 +318,10 @@ int Quadraples::getLineCountinStack()
 
 void Quadraples::printQuadraples() const
 {
+    for (auto quad : this->quadraples_functions)
+    {
+        quad->printEntry();
+    }
     for (auto quad : this->quadraples)
     {
         quad->printEntry();
@@ -324,6 +336,18 @@ void Quadraples::printQuadraplesToFile(char* filename) const
         // Handle error
         std::cerr << "Error opening file: " << filename << std::endl;
         return;
+    }
+
+    for (const auto& quad : this->quadraples_functions)
+    {
+        file << quad->label << " "
+             << quad->operation << " "
+             << quad->arg1 << " "
+             << quad->arg2 << " "
+             << quad->result << std::endl;
+
+        file.flush();
+
     }
 
     for (const auto& quad : this->quadraples)
