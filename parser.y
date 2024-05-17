@@ -16,6 +16,7 @@
     char* caseIdentifier;
     char* switchIdentifier;
     int flagFunction = 0;
+    int assignFunToVar = 0;
 
     Quadraples quad;
 
@@ -178,7 +179,7 @@ line : dataTypes ID '=' expression';'         {
       | switchCase {}
       | function {}
       | blockScope {}
-      | functionCall ';' {} 
+      | functionCall ';' {quad.insertEntry("Call",$1,"","");} 
       | returnStatement ';' {}
       | INCREMENT ID ';' {
                             SymbolEntry* entry = MotherSymbolTree.getEntryByName($2);
@@ -254,7 +255,10 @@ dataTypes : INT { $$ = $1;}
 /* Expression */
 expression : mathExpression {$$ = $1;}
             | boolExpression {$$ = $1;}
-            | functionCall {}
+            | functionCall {$$ = $1;
+                            char* label = quad.getCurrentLabel();
+                            quad.binaryOperation("call", label);
+                            }
             | CHAR_LITERAL { $$ = ConvertFromCharToString($1);}
             | STRING_LITERALS {$$ = $1;}
             ;
@@ -812,7 +816,9 @@ functionParameters : functionParameters ',' dataTypes ID {$$ = concatenateThreeS
                    | epsilon {$$ = "";}
                    ;
 
-functionCall : ID '(' functionCallParameters ')'{ }
+functionCall : ID '(' functionCallParameters ')'{ 
+  quad.insertVariable($1);
+}
              ;
 
 functionCallParameters : functionCallParameters ',' expression {}
