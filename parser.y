@@ -7,8 +7,6 @@
     #include "SemanticChecks/SemanticChecker.h"
     #include "utils.h"
     #include "Quadraples/Quadraples.h"
-
-    extern FILE *yyin;
     
     void yyerror(char* s);
     int yylex();
@@ -874,14 +872,14 @@ int main(int argc, char** argv){
   }
   
   yyin = file;
-
-  do{
-    yyparse();
-  }while(!feof(yyin));
-
-
   yyout = fopen("errors.txt", "w");
-  /* yyparse(); */
+
+  /* do{
+    yyparse();
+  }while(!feof(yyin)); */
+
+
+  yyparse();
   fclose(yyin);
   fclose(yyout);
   MotherSymbolTree.printAllTables();

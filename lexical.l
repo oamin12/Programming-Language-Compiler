@@ -66,7 +66,7 @@
 
 [()]     { return *yytext; }
 
-[ \n\r\t]       ; 
+[ \t]       ; 
 
 
     /* "//" {while(input() != '\n'); return EOL;}
