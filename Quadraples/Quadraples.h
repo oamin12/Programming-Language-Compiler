@@ -38,6 +38,7 @@ class Quadraples
 private:
     /* data */
     list<QuadrapleEntry*> quadraples;
+    list<QuadrapleEntry*> quadraples_functions;
     int entryCount = 0;
     int labelCount = 0;
     int lineCount = 0;
@@ -55,6 +56,8 @@ private:
     
 public:
     int currentListIndex = -1; // for nested if else
+    int isFunctionFlag = 0;
+
     Quadraples();
     void insertEntry(QuadrapleEntry* entry);
     void insertEntry(string operation, string arg1, string arg2, string result);

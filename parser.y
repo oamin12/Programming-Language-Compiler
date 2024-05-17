@@ -15,6 +15,7 @@
     int yylineno = 1;                
     char* caseIdentifier;
     char* switchIdentifier;
+    int flagFunction = 0;
 
     Quadraples quad;
 
@@ -474,25 +475,22 @@ boolComparators : GREATERTHANEQUAL {$$ = $1;}
                 ;
 
 /* ########################## IF-ELSE EXPRESSIONS  ##########################*/
-ifStatement : ifScope { printf("If Scope EndEHHHHHHHHHHH\n");
+ifStatement : ifScope { 
                         quad.currentListIndex -= 1;
-                        printf("If Scope EndAAAA\n");
                         if(quad.currentListIndex != -1)
                         {                         
                            quad.addLine2();
                         }
                       }
-            | ifScope elseScope { printf("If Scope End\n");
+            | ifScope elseScope { 
                                   quad.currentListIndex -= 1;
-                                  printf("If Scope End\n");
                                   if(quad.currentListIndex != -1){
                                     quad.addLine2();}
-
+                                    
                                   }
             ;
 
 ifScope : IfLabel '(' boolExpression ')' blockScope  { MotherSymbolTree.endCurrentScope("if"); 
-                                                  printf("If Scope End\n"); 
                                                   MotherSymbolTree.currentTable->printTable();
                                                 }
         ;
@@ -503,7 +501,6 @@ IfLabel : IF {
         ;
 
 elseScope : ElseLabel blockScope { MotherSymbolTree.endCurrentScope("else"); 
-                              printf("Else Scope End\n"); 
                               MotherSymbolTree.currentTable->printTable();
                               quad.addLine2();
                             }
@@ -790,6 +787,8 @@ function : functionSignature blockScope {
                                           MotherSymbolTree.endCurrentScope("function_signature");
                                           printf("Function Signature Scope End\n");
                                           MotherSymbolTree.currentTable->printTable();
+                                          quad.insertEntry("Ret","","","");
+                                          quad.isFunctionFlag = 0;
                                         }
          ;
 
@@ -801,6 +800,8 @@ functionSignature : dataTypes ID '(' functionParameters ')' {
                                                                                 {
                                                                                   printf("Function Signature Scope Begin\n"); 
                                                                                   MotherSymbolTree.currentTable->printTable();
+                                                                                  quad.isFunctionFlag = 1;
+                                                                                  quad.insertEntry(concatenateTwoStrings($2,":"),"","","");
                                                                                 }
                     
                                                                               }
