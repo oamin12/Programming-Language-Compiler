@@ -73,6 +73,7 @@ class MyDialog(QDialog, Ui_Dialog):
         super().__init__()
         self.setupUi(self)
         self.Compile_btn.clicked.connect(self.compile_button_clicked)
+        self.close_btn.clicked.connect(self.close)
 
     def compile_button_clicked(self):
         # Define the action to be performed when Compile_btn is clicked
